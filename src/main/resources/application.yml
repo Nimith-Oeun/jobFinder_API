@@ -1,0 +1,28 @@
+#===================================================================
+# Spring Boot application configuration for development environment
+#===================================================================
+
+#server configuration
+server:
+  port: ${MyServer.PORT}
+
+spring:
+  application:
+    name: job-finder
+
+  profiles:
+    active: dev
+
+  # Database configuration
+  datasource:
+    url: jdbc:postgresql://${MyServer.Database.HOST}/${MyServer.Database.DBNAME}
+    username: ${MyServer.Database.USER}
+    password: "${MyServer.Database.PASS}"
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true

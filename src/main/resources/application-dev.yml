@@ -1,0 +1,13 @@
+
+#===================================================================
+# development Configuration environment
+#===================================================================
+
+#Database configuration
+MyServer:
+  PORT: 8090
+  Database:
+    HOST: localhost:5432
+    DBNAME: jobfinder
+    USER: postgres
+    PASS: "P@ssw0rd()SQL"
