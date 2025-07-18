@@ -8,10 +8,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import persional.jobfinder_api.dto.request.JobCategoryRequest;
-import persional.jobfinder_api.dto.request.JobRequest;
+import persional.jobfinder_api.dto.request.JobRequestDTO;
 import persional.jobfinder_api.dto.request.SkillRequest;
-import persional.jobfinder_api.dto.respones.JobRespone;
-import persional.jobfinder_api.model.Skill;
+import persional.jobfinder_api.dto.respones.JobResponse;
 import persional.jobfinder_api.service.JobCategoryService;
 import persional.jobfinder_api.service.JobService;
 import persional.jobfinder_api.service.SkillService;
@@ -27,8 +26,8 @@ public class JobController {
     private final JobCategoryService jobCategoryService;
 
     @PostMapping("/create")
-    public ResponseEntity<?> createJob(@RequestBody JobRequest jobRequest){
-        JobRespone jobRespone = jobService.create(jobRequest);
+    public ResponseEntity<?> createJob(@RequestBody JobRequestDTO jobRequestDTO){
+        JobResponse jobRespone = jobService.create(jobRequestDTO);
         log.info("Job created successfully: {}", jobRespone);
         return ResponseEntity.ok(jobRespone);
     }

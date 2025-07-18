@@ -1,10 +1,10 @@
 package persional.jobfinder_api.service;
 
 import persional.jobfinder_api.dto.request.JobCategoryRequest;
-import persional.jobfinder_api.model.JobCatagory;
+import persional.jobfinder_api.model.JobCategory;
 
 public interface JobCategoryService {
 
-    JobCatagory create(JobCategoryRequest jobCategoryRequest);
-    JobCatagory getById(Long id);
+    JobCategory create(JobCategoryRequest jobCategoryRequest);
+    JobCategory getById(Long id);
 }

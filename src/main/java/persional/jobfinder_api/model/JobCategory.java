@@ -10,7 +10,7 @@ import java.util.UUID;
 @Data
 @Entity
 @Table(name = "tb_jobCatagory")
-public class JobCatagory {
+public class JobCategory {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,7 +21,7 @@ public class JobCatagory {
 
     private String name;
 
-    @OneToMany(mappedBy = "jobCatagory")
+    @OneToMany(mappedBy = "jobCategory")
     @JsonIgnore
     private List<Job> jobs;
 

@@ -2,13 +2,16 @@ package persional.jobfinder_api.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-@Data
+@Getter
+@Setter
 @Entity
 @Table(name = "tb_job")
 public class Job {
@@ -39,7 +42,7 @@ public class Job {
     @JoinColumn(
             name = "job_category_id"
     )
-    private JobCatagory jobCatagory;
+    private JobCategory jobCategory;
 
     @ManyToMany
     @JoinTable(

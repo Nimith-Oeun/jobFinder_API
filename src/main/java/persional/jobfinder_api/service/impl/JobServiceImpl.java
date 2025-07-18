@@ -3,14 +3,13 @@ package persional.jobfinder_api.service.impl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
-import persional.jobfinder_api.dto.request.JobRequest;
-import persional.jobfinder_api.dto.respones.JobRespone;
-import persional.jobfinder_api.dto.respones.SkillRespone;
+import persional.jobfinder_api.dto.request.JobRequestDTO;
+import persional.jobfinder_api.dto.respones.JobResponse;
 import persional.jobfinder_api.exception.BadRequestException;
 import persional.jobfinder_api.exception.ResourNotFound;
 import persional.jobfinder_api.mapper.JobMapper;
 import persional.jobfinder_api.model.Job;
-import persional.jobfinder_api.model.JobCatagory;
+import persional.jobfinder_api.model.JobCategory;
 import persional.jobfinder_api.model.JobRequirement;
 import persional.jobfinder_api.model.Skill;
 import persional.jobfinder_api.repository.JobCataggoryRepository;
@@ -30,37 +29,53 @@ public class JobServiceImpl implements JobService {
     private final JobCataggoryRepository jobCataggoryRepository;
     private final SkillRepository skillRepository;
 
-
     @Override
-    public JobRespone create(JobRequest jobRequest) {
+    public JobResponse create(JobRequestDTO jobRequestDTO) {
 
         // Validate job category UUID
-        if (!StringUtils.hasText(jobRequest.getJobCategory())) {
+        if (!StringUtils.hasText(String.valueOf(jobRequestDTO.getJobCategoryUuid()))) {
             throw new BadRequestException("Job Category UUID must not be empty");
         }
 
-        if (jobRequest.getSkills().isEmpty() || jobRequest.getJobRequirements().isEmpty()) {
+        if (jobRequestDTO.getSkills().isEmpty() || jobRequestDTO.getJobRequirements().isEmpty()) {
             throw new BadRequestException("Skill and Job Requirements must not be empty");
         }
 
+        // Check if all requested skills exist in the database
+        List<String> dbSkillNames = skillRepository.findAll()
+                .stream()
+                .map(Skill::getName)
+                .map(String::toLowerCase)
+                .toList();
+
+        List<String> requestedSkillNames = jobRequestDTO.getSkills()
+                .stream()
+                .map(skillDto -> skillDto.getName().toLowerCase())
+                .toList();
+
+        for (String skillName : requestedSkillNames) {
+            if (!dbSkillNames.contains(skillName)) {
+                throw new BadRequestException("Skill not found: " + skillName);
+            }
+        }
+
         // Map simple fields using MapStruct
-        Job job = jobMapper.mapToJob(jobRequest);
+        Job job = jobMapper.mapToJob(jobRequestDTO);
 
         // Set Job Category (manual DB fetch)
-        UUID categoryUuid = UUID.fromString(jobRequest.getJobCategory());
-        JobCatagory jobCatagory = jobCataggoryRepository.findByUuid(categoryUuid)
+        JobCategory jobCategory = jobCataggoryRepository.findByUuid(jobRequestDTO.getJobCategoryUuid())
                 .orElseThrow(() -> new ResourNotFound("Invalid job category UUID"));
-        job.setJobCatagory(jobCatagory);
+        job.setJobCategory(jobCategory);
 
         // Fetch and set Skill entities
-        Set<Skill> skills = jobRequest.getSkills().stream()
+        Set<Skill> skills = jobRequestDTO.getSkills().stream()
                 .map(skillDto -> skillRepository.findByNameIgnoreCase(skillDto.getName())
                         .orElseThrow(() -> new RuntimeException("Skill not found: " + skillDto.getName())))
                 .collect(Collectors.toSet());
         job.setSkills(skills);
 
         // Map and set Job Requirements
-        List<JobRequirement> requirements = jobRequest.getJobRequirements().stream()
+        List<JobRequirement> requirements = jobRequestDTO.getJobRequirements().stream()
                 .map(reqDto -> {
                     JobRequirement req = new JobRequirement();
                     req.setRequirement(reqDto.getRequirement());
@@ -74,21 +89,21 @@ public class JobServiceImpl implements JobService {
         Job savedJob = jobRepository.save(job);
 
         // Return full response
-        return jobMapper.mapToJobRespone(savedJob);
+        return jobMapper.mapToJobResponse(savedJob);
     }
 
     @Override
-    public JobRespone update(Long id, JobRequest jobRequest) {
+    public JobResponse update(Long id, JobRequestDTO jobRequestDTO) {
         return null;
     }
 
     @Override
-    public JobRespone getById(Long id) {
+    public JobResponse getById(Long id) {
         return null;
     }
 
     @Override
-    public List<JobRespone> getAll() {
+    public List<JobResponse> getAll() {
         return List.of();
     }
 

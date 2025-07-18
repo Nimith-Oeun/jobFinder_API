@@ -1,13 +1,17 @@
 package persional.jobfinder_api.dto.respones;
 
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
-@Data
-public class JobRespone {
+@Getter
+@Setter
+public class JobResponse {
 
     private String title;
 
@@ -25,7 +29,7 @@ public class JobRespone {
 
     private String jobType;
 
-    private String jobCategory;
+    private UUID jobCategoryUuid;
 
     private Set<SkillRespone> skills;
 
