@@ -98,8 +98,9 @@ public class JobServiceImpl implements JobService {
     }
 
     @Override
-    public JobResponse getById(Long id) {
-        return null;
+    public Job getById(Long id) {
+        return jobRepository.findById(id)
+                .orElseThrow(() -> new ResourNotFound("Job not found with ID: " + id));
     }
 
     @Override
