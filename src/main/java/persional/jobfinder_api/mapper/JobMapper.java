@@ -12,7 +12,6 @@ import persional.jobfinder_api.model.JobCategory;
 import persional.jobfinder_api.model.JobRequirement;
 import persional.jobfinder_api.model.Skill;
 
-import java.util.Set;
 import java.util.UUID;
 
 @Mapper(componentModel = "spring")
