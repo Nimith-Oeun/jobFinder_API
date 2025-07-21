@@ -3,6 +3,7 @@ package persional.jobfinder_api.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
+import persional.jobfinder_api.common.BaseEntity;
 
 import java.util.List;
 import java.util.UUID;
@@ -10,7 +11,7 @@ import java.util.UUID;
 @Data
 @Entity
 @Table(name = "tb_jobCatagory")
-public class JobCategory {
+public class JobCategory extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

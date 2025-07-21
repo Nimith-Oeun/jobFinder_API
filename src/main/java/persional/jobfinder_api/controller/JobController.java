@@ -11,6 +11,7 @@ import persional.jobfinder_api.dto.request.JobCategoryRequest;
 import persional.jobfinder_api.dto.request.JobRequestDTO;
 import persional.jobfinder_api.dto.request.SkillRequest;
 import persional.jobfinder_api.dto.respones.JobResponse;
+import persional.jobfinder_api.exception.SuccessRespone;
 import persional.jobfinder_api.service.JobCategoryService;
 import persional.jobfinder_api.service.JobService;
 import persional.jobfinder_api.service.SkillService;
@@ -29,17 +30,17 @@ public class JobController {
     public ResponseEntity<?> createJob(@RequestBody JobRequestDTO jobRequestDTO){
         JobResponse jobRespone = jobService.create(jobRequestDTO);
         log.info("Job created successfully: {}", jobRespone);
-        return ResponseEntity.ok(jobRespone);
+        return ResponseEntity.ok(SuccessRespone.success(jobRespone));
     }
     @PostMapping("/create/skill")
     public ResponseEntity<?> createSkill(@RequestBody SkillRequest skillRequest){
         skillService.create(skillRequest);
-        return ResponseEntity.ok("Skill created successfully: ");
+        return ResponseEntity.ok(SuccessRespone.success("Skill created successfully"));
     }
 
     @PostMapping("/create/category")
     public ResponseEntity<?> createCategory(@RequestBody JobCategoryRequest jobCategoryRequest){
         jobCategoryService.create(jobCategoryRequest);
-        return ResponseEntity.ok("Category created successfully: ");
+        return ResponseEntity.ok(SuccessRespone.success("Category created successfully"));
     }
 }

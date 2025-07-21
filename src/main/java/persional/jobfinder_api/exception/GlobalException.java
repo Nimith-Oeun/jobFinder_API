@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.time.LocalDateTime;
 
+
 @RestControllerAdvice
 @Slf4j
 public class GlobalException {
@@ -16,7 +17,7 @@ public class GlobalException {
         log.error("Bad request: {}", e.getMessage());
         ExceptionResponeDTO errorResponse = ExceptionResponeDTO.builder()
                 .errorCode("400")
-                .statusCode("400")
+                .statusCode("BAD_REQUEST")
                 .message(e.getMessage())
                 .timestamp(LocalDateTime.now())
                 .responeData(new EmptyRespone())
@@ -28,7 +29,7 @@ public class GlobalException {
         log.error("Internal server error: {}", e.getMessage());
         ExceptionResponeDTO errorResponse = ExceptionResponeDTO.builder()
                 .errorCode("500")
-                .statusCode("500")
+                .statusCode("INTERNAL_SERVER_ERROR")
                 .message(e.getMessage())
                 .timestamp(LocalDateTime.now())
                 .responeData(new EmptyRespone())
@@ -41,7 +42,7 @@ public class GlobalException {
         log.error("Resource not found: {}", e.getMessage());
         ExceptionResponeDTO errorResponse = ExceptionResponeDTO.builder()
                 .errorCode("404")
-                .statusCode("404")
+                .statusCode("NOT_FOUND")
                 .message(e.getMessage())
                 .timestamp(LocalDateTime.now())
                 .responeData(new EmptyRespone())

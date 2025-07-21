@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+import persional.jobfinder_api.common.BaseEntity;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -14,7 +15,7 @@ import java.util.Set;
 @Setter
 @Entity
 @Table(name = "tb_job")
-public class Job {
+public class Job extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
