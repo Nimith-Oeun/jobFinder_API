@@ -8,5 +8,5 @@ public class JobApplyRespone {
 
     private Integer jobId;
 
-    private String resume;
+    private Integer resume;
 }
