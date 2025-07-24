@@ -11,8 +11,13 @@ import java.util.Map;
 public interface JobService {
 
     JobResponse create(JobRequestDTO jobRequestDTO);
+
     JobResponse update(Long id, JobRequestDTO jobRequestDTO);
+
     Job getById(Long id);
+
+    // search and get all jobs
     List<Job> searchjob(Map<String,String> param);
+
     void delete(Long id);
 }
