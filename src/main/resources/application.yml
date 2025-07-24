@@ -10,6 +10,12 @@ spring:
   application:
     name: job-finder
 
+  # configuration for file upload limits
+  servlet:
+    multipart:
+      max-file-size: 1MB
+      max-request-size: 1MB
+
   profiles:
     active: dev
 

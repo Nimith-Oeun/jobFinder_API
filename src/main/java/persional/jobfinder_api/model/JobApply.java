@@ -14,7 +14,9 @@ public class JobApply extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String resume;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "resume_file_id")
+    private UploadFile resume;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "job_id")

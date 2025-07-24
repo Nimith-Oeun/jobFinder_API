@@ -10,5 +10,5 @@ public class JobApplyRequestDTO {
     private Integer jobId;
 
     @JsonProperty("resume")
-    private String resume;
+    private Integer resume;
 }

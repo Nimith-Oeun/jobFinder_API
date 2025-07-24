@@ -4,6 +4,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
+
 
 import java.time.LocalDateTime;
 
@@ -51,17 +53,15 @@ public class GlobalException {
 
     }
 
-//    @ExceptionHandler(MaxUploadSizeExceededException.class)
-//    public ResponseEntity<ErrorResponeDTO> handleBadRequestException(MaxUploadSizeExceededException e){
-//        log.error("Request Entity Too Large: {}", e.getMessage());
-//        ErrorResponeDTO errorResponse = ErrorResponeDTO.builder()
-//                .errorCode("413")
-//                .statusCode("413")
-//                .message(e.getMessage())
-//                .timestamp(LocalDateTime.now())
-//                .responeData(new EmptyRespone())
-//                .build();
-//        return ResponseEntity.status(413).body(errorResponse);
-//    }
-
-}
+    @ExceptionHandler({CustomMaxUploadSizeExceededException.class, MaxUploadSizeExceededException.class})
+    public ResponseEntity<ExceptionResponeDTO> handleLargeFileException(Exception e) {
+        ExceptionResponeDTO errorResponse = ExceptionResponeDTO.builder()
+                .errorCode("413")
+                .statusCode("REQUEST_ENTITY_TOO_LARGE")
+                .message(e.getMessage())
+                .timestamp(LocalDateTime.now())
+                .responeData(new EmptyRespone())
+                .build();
+        return ResponseEntity.status(413).body(errorResponse);
+    }
+    }
