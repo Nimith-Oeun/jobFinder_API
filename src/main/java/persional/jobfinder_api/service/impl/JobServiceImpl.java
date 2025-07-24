@@ -16,6 +16,8 @@ import persional.jobfinder_api.repository.JobCataggoryRepository;
 import persional.jobfinder_api.repository.JobRepository;
 import persional.jobfinder_api.repository.SkillRepository;
 import persional.jobfinder_api.service.JobService;
+import persional.jobfinder_api.spec.GlobleSearch;
+import persional.jobfinder_api.spec.GlobleSearchSpec;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -92,10 +94,6 @@ public class JobServiceImpl implements JobService {
         return jobMapper.mapToJobResponse(savedJob);
     }
 
-    @Override
-    public JobResponse update(Long id, JobRequestDTO jobRequestDTO) {
-        return null;
-    }
 
     @Override
     public Job getById(Long id) {
@@ -103,10 +101,36 @@ public class JobServiceImpl implements JobService {
                 .orElseThrow(() -> new ResourNotFound("Job not found with ID: " + id));
     }
 
+
+    /*
+     * Get all jobs with optional filtering by keyword or ID.
+     */
     @Override
-    public List<JobResponse> getAll() {
-        return List.of();
+    public List<Job> searchjob(Map<String, String> param) {
+
+        GlobleSearch globleSearch = new GlobleSearch();
+
+        if (param.containsKey("keyword")) {
+            String keyword = param.get("keyword");
+            globleSearch.setKeyword(keyword);
+        }
+
+        if( param.containsKey("id")) {
+            String id = param.get("id");
+            globleSearch.setId(Integer.valueOf(id));
+        }
+
+        GlobleSearchSpec globleSearchSpec = new GlobleSearchSpec(globleSearch);
+
+        return jobRepository.findAll(globleSearchSpec);
     }
+
+
+    @Override
+    public JobResponse update(Long id, JobRequestDTO jobRequestDTO) {
+        return null;
+    }
+
 
     @Override
     public void delete(Long id) {
