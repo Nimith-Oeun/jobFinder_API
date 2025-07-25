@@ -1,6 +1,7 @@
 package persional.jobfinder_api.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import persional.jobfinder_api.dto.request.JobRequestDTO;
@@ -16,12 +17,14 @@ import persional.jobfinder_api.repository.JobCataggoryRepository;
 import persional.jobfinder_api.repository.JobRepository;
 import persional.jobfinder_api.repository.SkillRepository;
 import persional.jobfinder_api.service.JobService;
-import persional.jobfinder_api.spec.GlobleSearch;
+import persional.jobfinder_api.spec.FilterSpec;
+import persional.jobfinder_api.spec.SearchFilterDTO;
 import persional.jobfinder_api.spec.GlobleSearchSpec;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class JobServiceImpl implements JobService {
@@ -108,21 +111,12 @@ public class JobServiceImpl implements JobService {
     @Override
     public List<Job> searchjob(Map<String, String> param) {
 
-        GlobleSearch globleSearch = new GlobleSearch();
+        return getJobs(param);
+    }
 
-        if (param.containsKey("keyword")) {
-            String keyword = param.get("keyword");
-            globleSearch.setKeyword(keyword);
-        }
-
-        if( param.containsKey("id")) {
-            String id = param.get("id");
-            globleSearch.setId(Integer.valueOf(id));
-        }
-
-        GlobleSearchSpec globleSearchSpec = new GlobleSearchSpec(globleSearch);
-
-        return jobRepository.findAll(globleSearchSpec);
+    @Override
+    public List<Job> filter(Map<String, String> param) {
+        return getJobs(param);
     }
 
 
@@ -135,5 +129,51 @@ public class JobServiceImpl implements JobService {
     @Override
     public void delete(Long id) {
 
+    }
+
+    private  List<Job> getJobs(Map<String, String> param) {
+
+        SearchFilterDTO searchFilterDTO = new SearchFilterDTO();
+
+        log.error("globle search param: {}", searchFilterDTO);
+
+        if (param.containsKey("keyword")) {
+            String keyword = param.get("keyword");
+            searchFilterDTO.setKeyword(keyword);
+
+            GlobleSearchSpec globleSearchSpec = new GlobleSearchSpec(searchFilterDTO);
+            return jobRepository.findAll(globleSearchSpec);
+        }
+
+        if (param.containsKey("category")) {
+            String category = param.get("category");
+            searchFilterDTO.setCategory(category);
+
+            FilterSpec filterSpec = new FilterSpec(searchFilterDTO);
+            return jobRepository.findAll(filterSpec);
+        }
+
+        if (param.containsKey("location")) {
+            String locations = param.get("location");
+            searchFilterDTO.setLocation(locations);
+
+            FilterSpec filterSpec = new FilterSpec(searchFilterDTO);
+            return jobRepository.findAll(filterSpec);
+        }
+
+        if (param.containsKey("skill")) {
+            String skill = param.get("skill");
+            searchFilterDTO.setSkill(skill);
+
+            FilterSpec filterSpec = new FilterSpec(searchFilterDTO);
+            return jobRepository.findAll(filterSpec);
+        }
+
+        if (param.containsKey("id")) {
+            Long id = Long.valueOf(param.get("id"));
+            return Collections.singletonList(getById(id));
+        }
+
+        return Collections.emptyList();
     }
 }
