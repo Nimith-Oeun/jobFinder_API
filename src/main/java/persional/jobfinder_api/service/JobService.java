@@ -19,5 +19,8 @@ public interface JobService {
     // search and get all jobs
     List<Job> searchjob(Map<String,String> param);
 
+    List<Job> filter(Map<String,String> param);
+
+
     void delete(Long id);
 }

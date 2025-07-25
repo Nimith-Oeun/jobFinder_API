@@ -16,20 +16,20 @@ import java.util.List;
 @RequiredArgsConstructor
 public class GlobleSearchSpec implements Specification<Job> {
 
-    private final GlobleSearch globleSearch;
+    private final SearchFilterDTO searchFilterDTO;
     List<Predicate> predicates = new ArrayList<>();
 
     @Override
     public Predicate toPredicate(Root<Job> job, CriteriaQuery<?> query, CriteriaBuilder cb) {
 
-        if (globleSearch.getKeyword() != null && !globleSearch.getKeyword().isEmpty()) {
+        if (searchFilterDTO.getKeyword() != null && !searchFilterDTO.getKeyword().isEmpty()) {
                 predicates.add(
-                        cb.like(cb.upper(job.get("title")), "%" + globleSearch.getKeyword().toUpperCase() + "%")
+                        cb.like(cb.upper(job.get("title")), "%" + searchFilterDTO.getKeyword().toUpperCase() + "%")
                 );
         }
 
-        if (globleSearch.getId() != null) {
-                predicates.add(cb.equal(job.get("id"), globleSearch.getId()));
+        if (searchFilterDTO.getId() != null) {
+                predicates.add(cb.equal(job.get("id"), searchFilterDTO.getId()));
         }
 
         return cb.and(predicates.toArray(Predicate[]::new));
