@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import persional.jobfinder_api.common.EmailService;
 import persional.jobfinder_api.dto.request.RegisterRequest;
 import persional.jobfinder_api.dto.request.VerifyOTPRequest;
+import persional.jobfinder_api.enums.Role;
 import persional.jobfinder_api.exception.BadRequestException;
 import persional.jobfinder_api.model.UserProfile;
 import persional.jobfinder_api.repository.UserProfileRepository;
@@ -31,14 +32,18 @@ public class RegisterServiceImpl implements RegisterService {
         handleText.HandleText(registerRequest.getUsername());
         handleText.HandleText(registerRequest.getEmail());
 
-        if (userProfileRepository.findByEmail(registerRequest.getEmail()).isPresent()) {
-            throw new BadRequestException("Email already exists");
+        if (userProfileRepository.findByUsername(registerRequest.getUsername()).isPresent()) {
+            throw new BadRequestException("userName already exists");
         }
 
         UserProfile userProfile = new UserProfile();
         userProfile.setUsername(registerRequest.getUsername());
         userProfile.setEmail(registerRequest.getEmail());
         userProfile.setPassword(encrypPassword.encode(registerRequest.getPassword())); // Ensure password is hashed in the UserProfile entity
+        userProfile.setRole(Role.USER);
+        userProfile.setAccountNonExpired(true);
+        userProfile.setAccountNonLocked(true);
+        userProfile.setCredentialsNonExpired(true);
 
         // Generate OTP
         String otp = String.format("%04d", new Random().nextInt(999999));
@@ -58,12 +63,12 @@ public class RegisterServiceImpl implements RegisterService {
                 .filter(user -> user.getOtp().equals(verifyOTPRequest.getOtp()))
                 .filter(user -> user.getOtpExpiry().isAfter(LocalDateTime.now()))
                 .map(user -> {
-                    user.setActive(true);
+                    user.setEnabled(true);
                     user.setOtp(null);
                     user.setOtpExpiry(null);
                     userProfileRepository.save(user);
                     return true;
                 })
-                .orElse(false);
+                .orElseThrow(() -> new BadRequestException("Invalid OTP or OTP expired"));
     }
 }

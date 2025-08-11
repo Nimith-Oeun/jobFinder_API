@@ -2,6 +2,7 @@ package persional.jobfinder_api.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import persional.jobfinder_api.enums.Role;
 
 import java.time.LocalDateTime;
 
@@ -42,10 +43,19 @@ public class UserProfile {
 
     private String instagram;
 
-    private boolean isActive = false;
+    @Enumerated(EnumType.STRING)
+    private Role role;
 
     private String otp;
 
     private LocalDateTime otpExpiry;
+
+    private boolean accountNonExpired;
+
+    private boolean accountNonLocked;
+
+    private boolean credentialsNonExpired;
+
+    private boolean enabled = false;
 
 }

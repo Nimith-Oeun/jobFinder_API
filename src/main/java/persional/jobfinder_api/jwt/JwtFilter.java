@@ -14,20 +14,20 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import persional.jobfinder_api.dto.request.LoginRequest;
+import persional.jobfinder_api.exception.InternalServerError;
+import persional.jobfinder_api.utils.JwtSecretUtil;
 
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Date;
 
-
 @RequiredArgsConstructor
 public class JwtFilter extends UsernamePasswordAuthenticationFilter {
 
     private final AuthenticationManager authenticationManager;
-
-    @Value("${JWT_SECRETE_KEY}")
-    String secretKey;
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request,
@@ -44,7 +44,7 @@ public class JwtFilter extends UsernamePasswordAuthenticationFilter {
 
         } catch (Exception e) {
             e.printStackTrace();
-            throw new RuntimeException("Error while authenticating user");
+            throw new InternalServerError("Error while authenticating user");
         }
     }
 
@@ -61,7 +61,7 @@ public class JwtFilter extends UsernamePasswordAuthenticationFilter {
                 .claim("authorities", authResult.getAuthorities())
                 .setExpiration(java.sql.Date.valueOf(LocalDate.now().plusDays(1))) // 1 day expiration
                 .setIssuer("jobfinder_api")
-                .signWith(Keys.hmacShaKeyFor(secretKey.getBytes()))
+                .signWith(JwtSecretUtil.getSecretKey())
                 .compact();
 
         response.setHeader("Authorization", token);

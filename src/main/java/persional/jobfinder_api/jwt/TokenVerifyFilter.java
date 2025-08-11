@@ -18,6 +18,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
+import persional.jobfinder_api.utils.JwtSecretUtil;
 
 import java.io.IOException;
 import java.util.List;
@@ -28,9 +29,6 @@ import java.util.stream.Collectors;
 
 @Slf4j
 public class TokenVerifyFilter extends OncePerRequestFilter {
-
-    @Value("${JWT_SECRETE_KEY}")
-    String secretKey;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -49,7 +47,7 @@ public class TokenVerifyFilter extends OncePerRequestFilter {
 
         try { // check if token expired then throw exception
             Jws<Claims> claimsJws = Jwts.parser()
-                    .setSigningKey(Keys.hmacShaKeyFor(secretKey.getBytes()))
+                    .setSigningKey(JwtSecretUtil.getSecretKey())
                     .build()
                     .parseClaimsJws(token);
 
