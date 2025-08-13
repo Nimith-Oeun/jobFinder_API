@@ -1,8 +1,10 @@
 package persional.jobfinder_api.controller;
 
 
+import jakarta.annotation.security.RolesAllowed;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import persional.jobfinder_api.dto.request.SocielRequestDTO;
 import persional.jobfinder_api.exception.SuccessRespone;
@@ -20,7 +22,7 @@ public class SocielController {
     private final SocielService socielService;
 
 
-
+    @RolesAllowed({"ADMIN"})
     @PostMapping("/create")
     public ResponseEntity<?> createSociel(@RequestBody SocielRequestDTO socielDTO) {
         Sociel sociel = socielService.create(socielDTO);
@@ -29,6 +31,7 @@ public class SocielController {
         );
     }
 
+    @PreAuthorize( "hasAuthority('sociel:read')")
     @GetMapping("")
     public ResponseEntity<?> getAll() {
         List<Sociel> sociels = socielService.getAll();
@@ -40,6 +43,7 @@ public class SocielController {
         );
     }
 
+    @PreAuthorize("hasAuthority('sociel:write')")
     @PutMapping("/{id}")
     public ResponseEntity<?> update(@PathVariable Long id,
                                     @RequestBody SocielRequestDTO socielDTO) {
@@ -49,6 +53,7 @@ public class SocielController {
         );
     }
 
+    @PreAuthorize("hasAuthority('sociel:write')")
     @DeleteMapping("/{id}")
     public ResponseEntity<?> delete(@PathVariable Long id) {
         socielService.delete(id);
