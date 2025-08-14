@@ -8,12 +8,14 @@ import persional.jobfinder_api.dto.request.RegisterRequest;
 import persional.jobfinder_api.dto.request.VerifyOTPRequest;
 import persional.jobfinder_api.enums.Role;
 import persional.jobfinder_api.exception.BadRequestException;
+import persional.jobfinder_api.exception.ResourNotFound;
 import persional.jobfinder_api.model.UserProfile;
 import persional.jobfinder_api.repository.UserProfileRepository;
 import persional.jobfinder_api.service.RegisterService;
 import persional.jobfinder_api.utils.HandleText;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.Random;
 
 @Service
@@ -24,6 +26,8 @@ public class RegisterServiceImpl implements RegisterService {
     private final UserProfileRepository userProfileRepository;
     private final EmailService emailService;
     private final PasswordEncoder encrypPassword;
+
+    private final int OTP_EXPIRY_MINUTES = 5;
 
 
     @Override
@@ -48,7 +52,8 @@ public class RegisterServiceImpl implements RegisterService {
         // Generate OTP
         String otp = String.format("%04d", new Random().nextInt(999999));
         userProfile.setOtp(otp);
-        userProfile.setOtpExpiry(LocalDateTime.now().plusMinutes(5));
+        userProfile.setOtpExpiry(LocalDateTime.now().plusMinutes(OTP_EXPIRY_MINUTES));
+        userProfile.setLastSendOtp(LocalDateTime.now());
 
         userProfileRepository.save(userProfile);
 
@@ -70,5 +75,37 @@ public class RegisterServiceImpl implements RegisterService {
                     return true;
                 })
                 .orElseThrow(() -> new BadRequestException("Invalid OTP or OTP expired"));
+    }
+
+    @Override
+    public void resendOTP(String email) {
+
+        UserProfile emailExist = userProfileRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourNotFound("Email not found"));
+
+        if (emailExist.isEnabled()) {
+            throw new BadRequestException("Account already verified");
+        }
+
+
+        int RESEND_COOLDOWN_SECONDS = 180;
+
+        // Check if the last OTP was sent within the cooldown period
+        if (Objects.nonNull(emailExist.getLastSendOtp()) && emailExist.getLastSendOtp().plusSeconds(RESEND_COOLDOWN_SECONDS).isAfter(LocalDateTime.now())) {
+            throw new RuntimeException("Please wait before resending OTP");
+
+        }
+
+        // Generate new OTP
+        String otp = String.format("%04d", new Random().nextInt(999999));
+        emailExist.setOtp(otp);
+        emailExist.setOtpExpiry(LocalDateTime.now().plusMinutes(OTP_EXPIRY_MINUTES));
+        emailExist.setLastSendOtp(LocalDateTime.now());
+        userProfileRepository.save(emailExist);
+
+        // Send OTP email
+        emailService.sendOtpEmail(email, otp);
+
+
     }
 }

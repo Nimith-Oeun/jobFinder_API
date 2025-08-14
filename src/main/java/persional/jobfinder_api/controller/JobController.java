@@ -4,6 +4,7 @@ import jakarta.annotation.security.RolesAllowed;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import persional.jobfinder_api.dto.request.JobCategoryRequest;
 import persional.jobfinder_api.dto.request.JobRequestDTO;
@@ -30,7 +31,7 @@ public class JobController {
     private final JobCategoryService jobCategoryService;
     private final JobMapper jobMapper;
 
-    @RolesAllowed({"ADMIN"})
+//    @RolesAllowed({"ADMIN"})
     @PostMapping("/create")
     public ResponseEntity<?> createJob(@RequestBody JobRequestDTO jobRequestDTO){
         JobResponse jobRespone = jobService.create(jobRequestDTO);
@@ -38,14 +39,14 @@ public class JobController {
         return ResponseEntity.ok(SuccessRespone.success(jobRespone));
     }
 
-    @RolesAllowed({"ADMIN"})
+//    @RolesAllowed({"ADMIN"})
     @PostMapping("/create/skill")
     public ResponseEntity<?> createSkill(@RequestBody SkillRequest skillRequest){
         skillService.create(skillRequest);
         return ResponseEntity.ok(SuccessRespone.success("Skill created successfully"));
     }
 
-    @RolesAllowed({"ADMIN"})
+//    @RolesAllowed({"ADMIN"})
     @PostMapping("/create/category")
     public ResponseEntity<?> createCategory(@RequestBody JobCategoryRequest jobCategoryRequest){
         jobCategoryService.create(jobCategoryRequest);

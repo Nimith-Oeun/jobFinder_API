@@ -7,4 +7,5 @@ public interface RegisterService {
 
     void register(RegisterRequest registerRequest);
     boolean verifyRegister(VerifyOTPRequest verifyOTPRequest);
+    void resendOTP(String email);
 }

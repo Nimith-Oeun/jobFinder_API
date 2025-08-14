@@ -45,15 +45,18 @@ public class TokenVerifyFilter extends OncePerRequestFilter {
 
         String token = authorizationHeader.replace("Bearer ", "");
 
-        try { // check if token expired then throw exception
-            Jws<Claims> claimsJws = Jwts.parser()
-                    .setSigningKey(JwtSecretUtil.getSecretKey())
-                    .build()
-                    .parseClaimsJws(token);
+        try { // Verify the JWT token
 
-            Claims body = claimsJws.getBody();
+            // Parse the JWT token and verify its signature
+            Jws<Claims> claimsJws = Jwts.parser()
+                    .verifyWith(JwtSecretUtil.getSecretKey()) //change deprecate setSigningKey() → verifyWith(Key)
+                    .build()
+                    .parseSignedClaims(token); // change deprecate parseClaimsJws() → parseSignedClaims(String)
+
+
+            Claims body = claimsJws.getPayload(); // Get the body of the JWT token and change deprecate getBody() → getPayload()
             String username = body.getSubject();
-            List<Map<String,String>> authorities = (List<Map<String, String>>) body.get("authorities");
+            List<Map<String,String>> authorities = (List<Map<String, String>>) body.get("authorities", List.class);
 
             Set<SimpleGrantedAuthority> grantedAuthorities = authorities.stream()
                     .map(x -> new SimpleGrantedAuthority(x.get("authority")))

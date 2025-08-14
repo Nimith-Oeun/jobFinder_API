@@ -50,6 +50,8 @@ public class UserProfile {
 
     private LocalDateTime otpExpiry;
 
+    private LocalDateTime lastSendOtp;
+
     private boolean accountNonExpired;
 
     private boolean accountNonLocked;

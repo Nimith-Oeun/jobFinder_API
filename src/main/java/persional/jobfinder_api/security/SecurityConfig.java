@@ -19,6 +19,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import persional.jobfinder_api.jwt.JwtFilter;
 import persional.jobfinder_api.jwt.TokenVerifyFilter;
+import persional.jobfinder_api.repository.UserProfileRepository;
 
 @Configuration
 @RequiredArgsConstructor
@@ -31,12 +32,13 @@ public class SecurityConfig {
     private final AuthenticationConfiguration authenticationConfiguration;
     private final UserDetailsService userDetailsService;
     private final PasswordEncoder passwordEncoder;
+    private final UserProfileRepository userProfileRepository;
 
     @Bean
     public SecurityFilterChain configur(HttpSecurity http)throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
-                .addFilter(new JwtFilter(authenticationManager(authenticationConfiguration)))
+                .addFilter(new JwtFilter(authenticationManager(authenticationConfiguration) , userProfileRepository))
                 .addFilterAfter(new TokenVerifyFilter(), JwtFilter.class)
                 .sessionManagement(config -> config
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))

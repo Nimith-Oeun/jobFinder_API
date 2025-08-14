@@ -52,4 +52,4 @@ spring:
           writetimeout: 5000
 
 # token_key
-JWT_SECRETE_KEY: 1234567890abcdef1234567890abcdef
+JWT_SECRETE_KEY: "M2CzVp+fBlwimFGjVbZ9zWQ4wCuGz3qgGfqCSwzkjHY="
