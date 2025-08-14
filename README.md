@@ -8,16 +8,19 @@ The instruction can be found at:
 ## User Registration, User Login and Authorization process.
 The diagram shows flow of how we implement User Registration, User Login and Authorization process.
 
-![spring-boot-spring-security-jwt-authentication-flow](spring-boot-spring-security-jwt-authentication-flow.png)
+<img width="734" height="546" alt="spring-boot-spring-security-jwt-authentication-flow" src="https://github.com/user-attachments/assets/ea4010a2-e390-4556-923a-c561029d137c" />
+
 
 And this is for Refresh Token:
 
-![spring-boot-refresh-token-jwt-example-flow](spring-boot-refresh-token-jwt-example-flow.png)
+<img width="700" height="480" alt="spring-boot-refresh-token-jwt-example-flow" src="https://github.com/user-attachments/assets/ad2de8fb-840d-4d26-93df-0ca1847c7e81" />
+
 
 ## Spring Boot Server Architecture with Spring Security
 You can have an overview of our Spring Boot Server with the diagram below:
 
-![spring-boot-jwt-authentication-spring-security-architecture](spring-boot-jwt-authentication-spring-security-architecture.png)
+<img width="700" height="480" alt="spring-boot-jwt-authentication-spring-security-architecture" src="https://github.com/user-attachments/assets/b24a1074-e479-4f3d-8c1f-78d1e47d3d89" />
+
 
 ## Configure Spring Datasource, JPA, App properties
 Open `src/main/resources/application.properties`
