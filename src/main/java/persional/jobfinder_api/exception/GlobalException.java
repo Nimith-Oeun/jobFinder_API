@@ -76,7 +76,7 @@ public class GlobalException {
                 .body(Map.of(
                         "timestamp", LocalDateTime.now(),
                         "status", 401,
-                        "error", "Unauthorized",
+                        "message", ex.getMessage(),
                         "path", request.getRequestURI()
                 ));
     }

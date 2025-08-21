@@ -2,11 +2,13 @@ package persional.jobfinder_api.jwt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -20,7 +22,9 @@ import persional.jobfinder_api.model.UserProfile;
 import persional.jobfinder_api.repository.UserProfileRepository;
 import persional.jobfinder_api.utils.JwtSecretUtil;
 
+import javax.crypto.SecretKey;
 import java.io.IOException;
+import java.security.Key;
 import java.time.LocalDate;
 import java.util.Date;
 
@@ -68,7 +72,17 @@ public class JwtFilter extends UsernamePasswordAuthenticationFilter {
                 .subject(authResult.getName())
                 .issuedAt(new Date())
                 .claim("authorities", authResult.getAuthorities())
-                .expiration(java.sql.Date.valueOf(LocalDate.now().plusDays(1))) // 1 day expiration
+                .expiration(new Date(System.currentTimeMillis() + 30 * 60 * 1000)) // 30 minute
+                .issuer("jobfinder_api")
+                .signWith(JwtSecretUtil.getSecretKey())
+                .compact();
+
+        // Refresh Token (long expiry)
+        String refreshToken = Jwts.builder()
+                .subject(authResult.getName())
+                .issuedAt(new Date())
+                .claim("authorities", authResult.getAuthorities())
+                .expiration(new Date(System.currentTimeMillis() + 7 * 24 * 60 * 60 * 1000)) // 7 days
                 .issuer("jobfinder_api")
                 .signWith(JwtSecretUtil.getSecretKey())
                 .compact();
@@ -78,6 +92,7 @@ public class JwtFilter extends UsernamePasswordAuthenticationFilter {
         LoginRespone loginRespone = LoginRespone.builder()
                 .userName(profile.getUsername())
                 .token(token)
+                .refreshToken(refreshToken)
                 .authorities(
                         authResult.getAuthorities().stream()
                                 .map(GrantedAuthority::getAuthority)
