@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import persional.jobfinder_api.common.EmailService;
+import persional.jobfinder_api.dto.request.ForgotPasswordRequest;
 import persional.jobfinder_api.dto.request.RegisterRequest;
 import persional.jobfinder_api.dto.request.VerifyOTPRequest;
 import persional.jobfinder_api.enums.Role;
@@ -69,7 +70,6 @@ public class RegisterServiceImpl implements RegisterService {
                 .filter(user -> user.getOtpExpiry().isAfter(LocalDateTime.now()))
                 .map(user -> {
                     user.setEnabled(true);
-                    user.setOtp(null);
                     user.setOtpExpiry(null);
                     userProfileRepository.save(user);
                     return true;

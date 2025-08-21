@@ -14,13 +14,16 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import persional.jobfinder_api.dto.request.ForgotPasswordRequest;
 import persional.jobfinder_api.dto.request.RegisterRequest;
+import persional.jobfinder_api.dto.request.ResetPasswordRequest;
 import persional.jobfinder_api.dto.request.VerifyOTPRequest;
 import persional.jobfinder_api.exception.BadRequestException;
 import persional.jobfinder_api.exception.InternalServerError;
 import persional.jobfinder_api.exception.SuccessRespone;
 import persional.jobfinder_api.model.UserProfile;
 import persional.jobfinder_api.repository.UserProfileRepository;
+import persional.jobfinder_api.service.ForgotPasswordService;
 import persional.jobfinder_api.service.RegisterService;
 import persional.jobfinder_api.utils.JwtSecretUtil;
 
@@ -35,6 +38,7 @@ public class AuthController {
 
     private final RegisterService registerService;
     private final UserProfileRepository userProfileRepository;
+    private final ForgotPasswordService forgotPasswordService;
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
@@ -49,7 +53,7 @@ public class AuthController {
         log.info("Verifying OTP for email: {}", request);
         if (registerService.verifyRegister(request)) {
             return ResponseEntity.ok(
-                    SuccessRespone.success("Account verified successfully!")
+                    SuccessRespone.success("Your OTP has been verified!")
             );
         }
         return ResponseEntity.badRequest()
@@ -115,4 +119,21 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid refresh token");
         }
     }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<?> forgotPassword(@RequestBody ForgotPasswordRequest request) {
+        forgotPasswordService.forgotPassword(request);
+        return ResponseEntity.ok(
+                SuccessRespone.success("Please Verify your email to reset your password!")
+        );
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordRequest request) {
+        forgotPasswordService.resetPassword(request);
+        return ResponseEntity.ok(
+                SuccessRespone.success("Password reset successfully!")
+        );
+    }
+
 }
