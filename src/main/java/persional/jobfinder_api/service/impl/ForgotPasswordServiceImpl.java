@@ -83,7 +83,7 @@ public class ForgotPasswordServiceImpl implements ForgotPasswordService {
         emailExist.setPassword(passwordEncoder.encode(reset.getNewPassword()));
         userProfileRepository.save(emailExist);
 
-        // Save the updated user profile
+        // Delete the OTP record after successful password reset
         resetPassowdTokenRepository.delete(getUser);
 
 
