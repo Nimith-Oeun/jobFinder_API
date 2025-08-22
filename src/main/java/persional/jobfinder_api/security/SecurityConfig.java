@@ -47,7 +47,7 @@ public class SecurityConfig {
                                         "/",
                                         "index.html",
                                         "/jobfinder_api/v1/auth/**",
-                                        "api-docs/**",  // OpenAPI docs
+                                        "v3/api-docs/**",  // OpenAPI docs
                                         "/swagger-ui/**",   // Swagger UI assets
                                         "/swagger-ui.html",
                                         "/api/auth/Register"// Swagger UI page

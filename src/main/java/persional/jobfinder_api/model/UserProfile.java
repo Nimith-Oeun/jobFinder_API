@@ -2,6 +2,7 @@ package persional.jobfinder_api.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import persional.jobfinder_api.common.BaseEntity;
 import persional.jobfinder_api.enums.Role;
 
 import java.time.LocalDateTime;
@@ -9,7 +10,7 @@ import java.time.LocalDateTime;
 @Data
 @Entity
 @Table(name = "tbl_userProfile")
-public class UserProfile {
+public class UserProfile extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
