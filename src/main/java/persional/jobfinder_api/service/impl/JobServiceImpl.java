@@ -122,12 +122,30 @@ public class JobServiceImpl implements JobService {
 
     @Override
     public JobResponse update(Long id, JobRequestDTO jobRequestDTO) {
-        return null;
+
+        Job job = getById(id);
+
+        job.setTitle(jobRequestDTO.getTitle());
+        job.setDescription(jobRequestDTO.getDescription());
+        job.setSalary(jobRequestDTO.getSalary());
+        job.setLocation(jobRequestDTO.getLocation());
+        job.setJobType(jobRequestDTO.getJobType());
+        job.setCompany(jobRequestDTO.getCompany());
+        job.setJobCategory(jobCataggoryRepository.findByUuid(jobRequestDTO.getJobCategoryUuid())
+                .orElseThrow(() -> new ResourNotFound("Invalid job category UUID")));
+        job.setAppliationInstr(jobRequestDTO.getAppliationInstr());
+        job.setThumbnail(jobRequestDTO.getThumbnail());
+
+        Job jobAfterUpdate = jobRepository.save(job);
+        return jobMapper.mapToJobResponse(jobAfterUpdate);
     }
 
 
     @Override
     public void delete(Long id) {
+
+        Job job = getById(id);
+        jobRepository.delete(job);
 
     }
 
@@ -172,6 +190,11 @@ public class JobServiceImpl implements JobService {
         if (param.containsKey("id")) {
             Long id = Long.valueOf(param.get("id"));
             return Collections.singletonList(getById(id));
+        }
+
+        // If no filters, return all jobs
+        if (param.isEmpty()) {
+            return jobRepository.findAll();
         }
 
         return Collections.emptyList();
