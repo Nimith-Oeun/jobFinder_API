@@ -38,6 +38,7 @@ public class SecurityConfig {
     public SecurityFilterChain configur(HttpSecurity http)throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
+                .cors(cors -> {})
                 .addFilter(new JwtFilter(authenticationManager(authenticationConfiguration) , userProfileRepository))
                 .addFilterAfter(new TokenVerifyFilter(), JwtFilter.class)
                 .sessionManagement(config -> config

@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import persional.jobfinder_api.common.EmailService;
 import persional.jobfinder_api.dto.request.ForgotPasswordRequest;
 import persional.jobfinder_api.dto.request.RegisterRequest;
+import persional.jobfinder_api.dto.request.ResendOTPRequest;
 import persional.jobfinder_api.dto.request.VerifyOTPRequest;
 import persional.jobfinder_api.enums.Role;
 import persional.jobfinder_api.exception.BadRequestException;
@@ -78,9 +79,9 @@ public class RegisterServiceImpl implements RegisterService {
     }
 
     @Override
-    public void resendOTP(String email) {
+    public void resendOTP(ResendOTPRequest request) {
 
-        UserProfile emailExist = userProfileRepository.findByEmail(email)
+        UserProfile emailExist = userProfileRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new ResourNotFound("Email not found"));
 
         if (emailExist.isEnabled()) {
@@ -104,7 +105,7 @@ public class RegisterServiceImpl implements RegisterService {
         userProfileRepository.save(emailExist);
 
         // Send OTP email
-        emailService.sendOtpEmail(email, otp);
+        emailService.sendOtpEmail(request.getEmail(), otp);
 
 
     }

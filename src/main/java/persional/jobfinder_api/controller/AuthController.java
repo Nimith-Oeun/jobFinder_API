@@ -14,10 +14,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-import persional.jobfinder_api.dto.request.ForgotPasswordRequest;
-import persional.jobfinder_api.dto.request.RegisterRequest;
-import persional.jobfinder_api.dto.request.ResetPasswordRequest;
-import persional.jobfinder_api.dto.request.VerifyOTPRequest;
+import persional.jobfinder_api.dto.request.*;
 import persional.jobfinder_api.exception.BadRequestException;
 import persional.jobfinder_api.exception.InternalServerError;
 import persional.jobfinder_api.exception.SuccessRespone;
@@ -61,9 +58,9 @@ public class AuthController {
     }
 
     @PostMapping("/resend-otp")
-    public ResponseEntity<?> resendOtp(@RequestParam String email) {
-        log.info("Resending OTP to email: {}", email);
-        registerService.resendOTP(email);
+    public ResponseEntity<?> resendOtp(@RequestBody ResendOTPRequest request) {
+        log.info("Resending OTP to email: {}", request.getEmail());
+        registerService.resendOTP(request);
         return ResponseEntity.ok(
                 SuccessRespone.success("OTP sent to your email!")
         );

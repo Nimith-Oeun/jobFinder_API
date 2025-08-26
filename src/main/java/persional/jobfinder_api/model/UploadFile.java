@@ -2,6 +2,7 @@ package persional.jobfinder_api.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import org.springframework.context.annotation.Profile;
 import persional.jobfinder_api.common.BaseEntity;
 
 @Data
@@ -27,5 +28,9 @@ public class UploadFile extends BaseEntity {
 
     @Column(name = "Part_Upload")
     private String partUpload;
+
+    @ManyToOne
+    @JoinColumn(name = "user_profile_id")
+    private UserProfile profile;
 
 }

@@ -6,6 +6,7 @@ import persional.jobfinder_api.common.BaseEntity;
 import persional.jobfinder_api.enums.Role;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @Entity
@@ -43,6 +44,17 @@ public class UserProfile extends BaseEntity {
     private String linkedin;
 
     private String instagram;
+
+    @OneToMany(mappedBy = "profile",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true)
+    private List<UploadFile> uploadFiles;
+
+    @OneToMany(mappedBy = "profile",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true)
+    private List<JobApply> applyJobs;
+
 
     @Enumerated(EnumType.STRING)
     private Role role;
