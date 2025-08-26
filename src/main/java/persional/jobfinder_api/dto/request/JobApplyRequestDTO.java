@@ -11,4 +11,6 @@ public class JobApplyRequestDTO {
 
     @JsonProperty("resume")
     private Integer resume;
+
+    private Integer profileId;
 }

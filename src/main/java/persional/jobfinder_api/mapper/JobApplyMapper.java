@@ -7,14 +7,20 @@ import persional.jobfinder_api.dto.respones.JobApplyRespone;
 import persional.jobfinder_api.model.JobApply;
 import persional.jobfinder_api.service.JobService;
 import persional.jobfinder_api.service.UploadFileService;
+import persional.jobfinder_api.service.UserService;
 
-@Mapper(componentModel = "spring" , uses = {JobService.class , UploadFileService.class})
+@Mapper(componentModel = "spring" ,
+        uses = {JobService.class ,
+                UploadFileService.class ,
+                UserService.class})
 public interface JobApplyMapper {
 
     @Mapping(target = "job", source = "jobId")
+    @Mapping(target = "profile", source = "profileId")
     JobApply mapToJobApply(JobApplyRequestDTO request);
 
     @Mapping(target = "jobId", source = "job.id")
     @Mapping(target = "resume", source = "resume.id")
+    @Mapping(target = "profileId", source = "profile.id")
     JobApplyRespone mapToJobApplyRespone(JobApply jobApply);
 }

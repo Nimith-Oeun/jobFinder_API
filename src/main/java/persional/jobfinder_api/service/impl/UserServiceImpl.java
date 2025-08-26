@@ -34,4 +34,10 @@ public class UserServiceImpl implements UserService {
 
         return Optional.ofNullable( authUser);
     }
+
+    @Override
+    public UserProfile getUserProfileById(Long id) {
+        return userProfileRepository.findById(id)
+                .orElseThrow(() -> new ResourNotFound("User not found with id: " + id));
+    }
 }
