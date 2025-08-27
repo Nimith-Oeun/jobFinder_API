@@ -24,7 +24,11 @@ public enum Permission {
     UPLOAD_WRITE("upload:write"),
 
     CATEGORY_READ("category:read"),
-    CATEGORY_WRITE("category:write");
+    CATEGORY_WRITE("category:write"),
+
+    RESUME_READ("resume:read"),
+    RESUME_WRITE("resume:write");
+
 
     private String description;
 

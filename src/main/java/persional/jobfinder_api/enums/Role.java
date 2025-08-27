@@ -34,7 +34,9 @@ public enum Role {
             SKILL_READ,
             SOCIAL_READ,
             CATEGORY_READ,
-            UPLOAD_WRITE
+            UPLOAD_WRITE,
+            RESUME_WRITE
+
     ));
 
     private Set<Permission> permissions;
