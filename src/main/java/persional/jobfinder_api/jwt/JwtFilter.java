@@ -88,7 +88,7 @@ public class JwtFilter extends UsernamePasswordAuthenticationFilter {
                 .compact();
 
         // Response object to hold the login response
-        UserProfile profile = userProfileRepository.findByUsername(authResult.getName()).get();
+        UserProfile profile = userProfileRepository.findByEmail(authResult.getName()).get();
         LoginRespone loginRespone = LoginRespone.builder()
                 .userName(profile.getUsername())
                 .token(token)

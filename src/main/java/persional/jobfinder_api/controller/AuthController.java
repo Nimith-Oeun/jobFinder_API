@@ -22,6 +22,7 @@ import persional.jobfinder_api.model.UserProfile;
 import persional.jobfinder_api.repository.UserProfileRepository;
 import persional.jobfinder_api.service.ForgotPasswordService;
 import persional.jobfinder_api.service.RegisterService;
+import persional.jobfinder_api.service.UserService;
 import persional.jobfinder_api.utils.JwtSecretUtil;
 
 import java.util.*;
@@ -36,6 +37,7 @@ public class AuthController {
     private final RegisterService registerService;
     private final UserProfileRepository userProfileRepository;
     private final ForgotPasswordService forgotPasswordService;
+    private final UserService userService;
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest request) {

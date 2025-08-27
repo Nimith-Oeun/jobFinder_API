@@ -19,7 +19,8 @@ import java.util.Objects;
 public class FileHandle {
 
     private final UploadFileRepository uploadFileRepository;
-    private final List<String> FILE_EXTENSIONS = List.of("pdf");
+    private final List<String> FILE_EXTENSIONS_CV = List.of("pdf");
+    private final List<String> FILE_EXTENSIONS_PF = List.of("png","jpg","jpeg");
 
     //check if the file is empty
     public void validateUploadFile(MultipartFile files){
@@ -30,14 +31,27 @@ public class FileHandle {
     }
 
     //check file format
-    public void validateFileFormat(MultipartFile files){
+    public void validateFileCVFormat(MultipartFile files){
 
         var fileName = StringUtils.cleanPath(Objects.requireNonNull(files.getOriginalFilename()));
         var extension = FileExtencion.getExtension(fileName);
 
-        if (!FILE_EXTENSIONS.contains(extension)) {
+        if (!FILE_EXTENSIONS_CV.contains(extension)) {
             log.warn("File Extencion is not allow to upload , please verify: {}", fileName);
             throw new InternalServerError("File Extencion is not allow to upload , please verify: " + fileName);
+        }
+    }
+
+    public void validateFilePhotoFormat(MultipartFile files){
+
+        var fileName = StringUtils.cleanPath(Objects.requireNonNull(files.getOriginalFilename()));
+        var extension = FileExtencion.getExtension(fileName);
+
+        if (!FILE_EXTENSIONS_PF.contains(extension)) {
+            log.warn("File Extencion is not allow to upload , please verify: {}", fileName);
+            throw new InternalServerError(
+                    "File Extencion " + extension +"is not allow to upload , please verify: " + fileName
+            );
         }
     }
 }
