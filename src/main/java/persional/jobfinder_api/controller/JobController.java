@@ -55,10 +55,9 @@ public class JobController {
 
     @GetMapping("")
     public ResponseEntity<?> globleSearch(@RequestParam Map<String,String> search) {
-        List<JobResponse> jobList = jobService.searchjob(search)
-                .stream().map(jobMapper::mapToJobResponse)
-                .toList();
-        return ResponseEntity.ok(SuccessRespone.success(jobList));
+        log.info("GET JOB METHOD: {}", search);
+        List<JobResponse> responses = jobService.searchjob(search);
+        return ResponseEntity.ok(SuccessRespone.success(responses));
     }
 
     @RolesAllowed({"ADMIN"})

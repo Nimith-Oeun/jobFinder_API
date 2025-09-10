@@ -2,6 +2,7 @@ package persional.jobfinder_api.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import persional.jobfinder_api.dto.request.JobRequestDTO;
@@ -98,8 +99,10 @@ public class JobServiceImpl implements JobService {
     }
 
 
+    @Cacheable(value = "jobs", key = "#param")
     @Override
     public Job getById(Long id) {
+        log.info("fetch job by id: {}", id);
         return jobRepository.findById(id)
                 .orElseThrow(() -> new ResourNotFound("Job not found with ID: " + id));
     }
@@ -108,10 +111,15 @@ public class JobServiceImpl implements JobService {
     /*
      * Get all jobs with optional filtering by keyword or ID.
      */
+    @Cacheable(value = "JobResponse")
     @Override
-    public List<Job> searchjob(Map<String, String> param) {
-
-        return getJobs(param);
+    public List<JobResponse> searchjob(Map<String, String> param) {
+        log.info("fetch all job: {}", param);
+        List<Job> fetchedJobs = getJobs(param);
+        List<JobResponse> jobResponses = fetchedJobs.stream()
+                .map(jobMapper::mapToJobResponse)
+                .toList();
+        return jobResponses;
     }
 
     @Override

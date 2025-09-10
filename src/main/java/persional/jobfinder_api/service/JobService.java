@@ -17,7 +17,7 @@ public interface JobService {
     Job getById(Long id);
 
     // search and get all jobs
-    List<Job> searchjob(Map<String,String> param);
+    List<JobResponse> searchjob(Map<String,String> param);
 
     List<Job> filter(Map<String,String> param);
 
