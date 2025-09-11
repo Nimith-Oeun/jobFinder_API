@@ -2,7 +2,10 @@ package persional.jobfinder_api.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import persional.jobfinder_api.dto.request.JobRequestDTO;
@@ -35,6 +38,7 @@ public class JobServiceImpl implements JobService {
     private final JobCataggoryRepository jobCataggoryRepository;
     private final SkillRepository skillRepository;
 
+    @CacheEvict(value = {"jobs", "JobResponse"}, allEntries = true)  // Evict all entries in the "jobs" cache
     @Override
     public JobResponse create(JobRequestDTO jobRequestDTO) {
 
@@ -111,7 +115,7 @@ public class JobServiceImpl implements JobService {
     /*
      * Get all jobs with optional filtering by keyword or ID.
      */
-    @Cacheable(value = "JobResponse")
+    @Cacheable(value = "JobResponse" , key = "#param")
     @Override
     public List<JobResponse> searchjob(Map<String, String> param) {
         log.info("fetch all job: {}", param);
@@ -122,12 +126,18 @@ public class JobServiceImpl implements JobService {
         return jobResponses;
     }
 
+    @Cacheable(value = "jobs", key = "#param")
     @Override
-    public List<Job> filter(Map<String, String> param) {
-        return getJobs(param);
+    public List<JobResponse> filter(Map<String, String> param) {
+        List<Job> jobs = getJobs(param);
+        List<JobResponse> jobResponseList = jobs.stream()
+                .map(jobMapper::mapToJobResponse)
+                .toList();
+        return jobResponseList;
     }
 
 
+    @CacheEvict(value = {"jobs", "JobResponse"}, allEntries = true)
     @Override
     public JobResponse update(Long id, JobRequestDTO jobRequestDTO) {
 
@@ -149,12 +159,12 @@ public class JobServiceImpl implements JobService {
     }
 
 
+    @CacheEvict(value = {"jobs", "JobResponse"}, allEntries = true)
     @Override
     public void delete(Long id) {
-
+        log.info("delete job by id: {}", id);
         Job job = getById(id);
         jobRepository.delete(job);
-
     }
 
     private  List<Job> getJobs(Map<String, String> param) {
