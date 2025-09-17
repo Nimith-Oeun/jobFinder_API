@@ -17,8 +17,11 @@ import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.*;
+import persional.jobfinder_api.dto.respones.ProfileRespone;
 
 import java.time.Duration;
+import java.util.HashMap;
+import java.util.Map;
 
 @Configuration
 @EnableCaching
@@ -30,6 +33,7 @@ public class RedisConfig {
     @Value(("${spring.data.redis.port}"))
     private int redisPort;
 
+    //
     @Bean
     public RedisStandaloneConfiguration redisStandaloneConfiguration() {
         RedisStandaloneConfiguration configuration = new RedisStandaloneConfiguration();
@@ -58,6 +62,11 @@ public class RedisConfig {
         return redisTemplate;
     }
 
+
+    /**
+     *
+     * Configure Jackson2JsonRedisSerializer with custom ObjectMapper
+     */
     protected Jackson2JsonRedisSerializer<Object> jackson2JsonRedisSerializer() {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
@@ -68,20 +77,80 @@ public class RedisConfig {
 
     @Bean
     public CacheManager cacheManager(RedisConnectionFactory redisConnectionFactory) {
+
         RedisSerializer<String> redisSerializer = new StringRedisSerializer();
+
+
+        // --- Default configuration ---
         RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig()
-                .entryTtl(Duration.ofMinutes(3))
+                .entryTtl(Duration.ofMinutes(10)) // Default TTL
                 .serializeKeysWith(RedisSerializationContext
                         .SerializationPair
-                        .fromSerializer(redisSerializer)
-                )
+                        .fromSerializer(redisSerializer))
                 .serializeValuesWith(RedisSerializationContext
                         .SerializationPair
-                        .fromSerializer(this.jackson2JsonRedisSerializer())
-                )
+                        .fromSerializer(this.jackson2JsonRedisSerializer()))
                 .disableCachingNullValues();
+
+
+        // --- Per-cache configurations ---
+        Map<String, RedisCacheConfiguration> cacheConfigs = new HashMap<>();
+
+
+        // userProfiles cache
+        cacheConfigs.put("userProfiles",
+                config
+                        .entryTtl(Duration.ofMinutes(10))
+                        .serializeKeysWith(RedisSerializationContext
+                                .SerializationPair
+                                .fromSerializer(
+                                        redisSerializer
+                                ))
+                        .serializeValuesWith(RedisSerializationContext
+                                .SerializationPair
+                                .fromSerializer(
+                                        new Jackson2JsonRedisSerializer<>(ProfileRespone.class)
+                                ))
+                        .disableCachingNullValues()
+        );
+
+
+        // jobresponse cache
+        cacheConfigs.put("JobResponse",
+                config
+                        .entryTtl(Duration.ofMinutes(60))
+                        .serializeKeysWith(RedisSerializationContext
+                                .SerializationPair
+                                .fromSerializer(
+                                        redisSerializer
+                                ))
+                        .serializeValuesWith(RedisSerializationContext
+                                .SerializationPair
+                                .fromSerializer(
+                                        this.jackson2JsonRedisSerializer()
+                                ))
+                        .disableCachingNullValues()
+        );
+
+
+        // jobs cache
+        cacheConfigs.put("jobs",
+                config
+                        .entryTtl(Duration.ofMinutes(60))
+                        .serializeKeysWith(RedisSerializationContext
+                                .SerializationPair
+                                .fromSerializer(redisSerializer))
+                        .serializeValuesWith(RedisSerializationContext
+                                .SerializationPair
+                                .fromSerializer(this.jackson2JsonRedisSerializer()))
+                        .disableCachingNullValues()
+        );
+
+
         return RedisCacheManager.builder(redisConnectionFactory)
-                .cacheDefaults(config)
+                .cacheDefaults(config) // default config applied to caches without specific config
+                .withInitialCacheConfigurations(cacheConfigs) // specific cache configurations
+                .transactionAware() //if action to Db fails, the cache will roll back. cache will constant old data
                 .build();
     }
 }

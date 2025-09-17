@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import persional.jobfinder_api.dto.respones.ProfileRespone;
 import persional.jobfinder_api.enums.FileType;
 import persional.jobfinder_api.exception.InternalServerError;
 import persional.jobfinder_api.model.Resume;
@@ -38,7 +39,7 @@ public class ResumeServiceImpl implements ResumeService {
         fileHandle.validateFileCVFormat(file);
 
         // get current user
-        UserProfile profile = userService.getCurrentUserProfile();
+        ProfileRespone profile = userService.getCurrentUserProfile();
 
         UserProfile userProfileId = userProfileRepository.findById(profile.getId())
                 .orElseThrow(() -> new InternalServerError("User not found with id: " + profile.getId()));

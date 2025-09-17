@@ -12,6 +12,6 @@ import java.util.Optional;
 public interface UserService {
     Optional<AuthUser> findByEmail(String email);
     UserProfile getUserProfileById(Long id);
-    UserProfile getCurrentUserProfile();
+    ProfileRespone getCurrentUserProfile();
     UserProfile updateUser(ProfileUpdateRequest profileUpdateRequest);
 }

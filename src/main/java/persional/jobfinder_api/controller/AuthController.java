@@ -69,8 +69,12 @@ public class AuthController {
     }
 
     @PostMapping("/refresh-token")
-    public ResponseEntity<?> refreshToken(@RequestParam String refreshToken) {
+    public ResponseEntity<?> refreshToken(@RequestBody Map<String, String> requestBody) {
+
+        String refreshToken = requestBody.get("refreshToken");
+
         try {
+            // Parse & validate refresh token
             Jws<Claims> claims = Jwts.parser()
                     .verifyWith(JwtSecretUtil.getSecretKey())
                     .build()
@@ -83,41 +87,50 @@ public class AuthController {
             userProfileRepository.findByUsername(username)
                     .orElseThrow(() -> new BadRequestException("User not found"));
 
+            // Get authorities from refresh token (optional, some designs only keep username in refresh token)
             List<Map<String, String>> authorities = (List<Map<String, String>>) body.get("authorities", List.class);
-
             Set<SimpleGrantedAuthority> grantedAuthorities = authorities.stream()
                     .map(x -> new SimpleGrantedAuthority(x.get("authority")))
                     .collect(Collectors.toSet());
 
-            Authentication authentication = new UsernamePasswordAuthenticationToken(
-                    username,
-                    null,
-                    grantedAuthorities
-            );
-
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-
-            // Generate new access token
+            // Generate new access token (30 min)
             String newAccessToken = Jwts.builder()
                     .subject(username)
                     .issuedAt(new Date())
                     .claim("authorities", authorities)
-                    .expiration(new Date(System.currentTimeMillis() + 30 * 60 * 1000)) // 30 min
+                    .expiration(new Date(System.currentTimeMillis() + 30 * 60 * 1000))
                     .issuer("jobfinder_api")
                     .signWith(JwtSecretUtil.getSecretKey())
                     .compact();
 
-            Map<String, String> response = new HashMap<>();
+            Map<String, Object> response = new HashMap<>();
             response.put("accessToken", newAccessToken);
+            response.put("refreshToken", refreshToken); // send back the same refresh token
+            response.put("tokenType", "Bearer");
 
             return ResponseEntity.ok(response);
 
         } catch (ExpiredJwtException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new AuthenticationException("Refresh token expired") {});
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
+                    Map.of(
+                            "status", 401,
+                            "error", "Unauthorized",
+                            "message", "Refresh token has expired. Please log in again.",
+                            "path", "/refresh-token"
+                    )
+            );
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid refresh token");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
+                    Map.of(
+                            "status", 401,
+                            "error", "Unauthorized",
+                            "message", "Invalid refresh token",
+                            "path", "/refresh-token"
+                    )
+            );
         }
     }
+
 
     @PostMapping("/forgot-password")
     public ResponseEntity<?> forgotPassword(@RequestBody ForgotPasswordRequest request) {

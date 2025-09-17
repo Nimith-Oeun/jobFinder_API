@@ -1,6 +1,8 @@
 package persional.jobfinder_api.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -17,6 +19,7 @@ import persional.jobfinder_api.service.UserService;
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
@@ -48,8 +51,12 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new ResourNotFound("User not found with id: " + id));
     }
 
+    @Cacheable(value = "userProfiles" )
     @Override
-    public UserProfile getCurrentUserProfile() {
+    public ProfileRespone getCurrentUserProfile() {
+
+        log.info("fetch Get current user profile");
+
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication == null || !authentication.isAuthenticated()) {
@@ -75,31 +82,32 @@ public class UserServiceImpl implements UserService {
         String name = userProfile.getUsername();
         System.out.println("Name:" + name);
 
-        return userProfile;
+        return ProfileMapper.INSTANCE.mapToProfileRespone(userProfile);
     }
 
     @Override
     public UserProfile updateUser(ProfileUpdateRequest profileUpdateRequest) {
 
-        UserProfile currentUserProfile = getCurrentUserProfile();
+//        UserProfile currentUserProfile = getCurrentUserProfile();
+//
+//        UserProfile userProfile = userProfileRepository.findById(currentUserProfile.getId())
+//                .orElseThrow(() -> new ResourNotFound("User not found with id: " + currentUserProfile.getId()));
+//
+//        userProfile.setUsername(profileUpdateRequest.getUsername());
+//        userProfile.setFirstName(profileUpdateRequest.getFirstName());
+//        userProfile.setLastName(profileUpdateRequest.getLastName());
+//        userProfile.setAddress(profileUpdateRequest.getAddress());
+//        userProfile.setGender(profileUpdateRequest.getGender());
+//        userProfile.setBio(profileUpdateRequest.getBio());
+//        userProfile.setDateOfBirth(profileUpdateRequest.getDateOfBirth());
+//        userProfile.setFacebook(profileUpdateRequest.getFacebook());
+//        userProfile.setInstagram(profileUpdateRequest.getInstagram());
+//        userProfile.setLinkedin(profileUpdateRequest.getLinkedin());
+//        userProfile.setPhoneNumber(profileUpdateRequest.getPhoneNumber());
+//        userProfile.setTwitter(profileUpdateRequest.getTwitter());
 
-        UserProfile userProfile = userProfileRepository.findById(currentUserProfile.getId())
-                .orElseThrow(() -> new ResourNotFound("User not found with id: " + currentUserProfile.getId()));
-
-        userProfile.setUsername(profileUpdateRequest.getUsername());
-        userProfile.setFirstName(profileUpdateRequest.getFirstName());
-        userProfile.setLastName(profileUpdateRequest.getLastName());
-        userProfile.setAddress(profileUpdateRequest.getAddress());
-        userProfile.setGender(profileUpdateRequest.getGender());
-        userProfile.setBio(profileUpdateRequest.getBio());
-        userProfile.setDateOfBirth(profileUpdateRequest.getDateOfBirth());
-        userProfile.setFacebook(profileUpdateRequest.getFacebook());
-        userProfile.setInstagram(profileUpdateRequest.getInstagram());
-        userProfile.setLinkedin(profileUpdateRequest.getLinkedin());
-        userProfile.setPhoneNumber(profileUpdateRequest.getPhoneNumber());
-        userProfile.setTwitter(profileUpdateRequest.getTwitter());
-
-        return userProfileRepository.save(userProfile);
+//        return userProfileRepository.save(userProfile);
+        return null;
     }
 
 

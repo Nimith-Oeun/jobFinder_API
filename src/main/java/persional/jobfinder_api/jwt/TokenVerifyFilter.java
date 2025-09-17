@@ -1,5 +1,6 @@
 package persional.jobfinder_api.jwt;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jws;
@@ -22,10 +23,7 @@ import persional.jobfinder_api.utils.JwtSecretUtil;
 
 import javax.crypto.SecretKey;
 import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -70,8 +68,22 @@ public class TokenVerifyFilter extends OncePerRequestFilter {
             );
             SecurityContextHolder.getContext().setAuthentication(authentication);
         }catch (ExpiredJwtException e){
-            log.info(e.getMessage());
-            throw new BadRequestException(e.getMessage());
+            log.warn(e.getMessage());
+
+            // Custom response for expired token show to user
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json");
+            response.setCharacterEncoding("UTF-8");
+
+            Map<String ,Object> body = new HashMap<>();
+            body.put("status", HttpServletResponse.SC_UNAUTHORIZED);
+            body.put("error", "Unauthorized");
+            body.put("message", "Token has expired");
+            body.put("path", request.getRequestURI());
+
+            new ObjectMapper().writeValue(response.getOutputStream(), body);
+
+            return;
         }
         filterChain.doFilter(request, response);
     }

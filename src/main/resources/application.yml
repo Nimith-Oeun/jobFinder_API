@@ -57,6 +57,11 @@ spring:
       host: 127.0.0.1
       port: 6379
 
+# disable spring devtools restart
+  devtools:
+    restart:
+      enabled: false
+
 # token_key
 application:
   security:

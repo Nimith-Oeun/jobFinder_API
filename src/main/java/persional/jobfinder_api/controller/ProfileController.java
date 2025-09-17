@@ -39,11 +39,11 @@ public class ProfileController {
     //get current user profile that login
     @GetMapping("")
     public ResponseEntity<?> getCurrentUserProfile() {
+        log.info("Get Method current user profile");
         try {
 
-            var userProfile = userService.getCurrentUserProfile();
             return ResponseEntity.ok(
-                    ProfileMapper.INSTANCE.mapToProfileRespone(userProfile)
+                    userService.getCurrentUserProfile()
             );
 
         } catch (Exception e) {
