@@ -8,15 +8,21 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import persional.jobfinder_api.dto.request.LoginRequest;
 import persional.jobfinder_api.dto.respones.LoginRespone;
+import persional.jobfinder_api.exception.BadRequestException;
+import persional.jobfinder_api.exception.EmptyRespone;
+import persional.jobfinder_api.exception.ExceptionResponeDTO;
 import persional.jobfinder_api.exception.InternalServerError;
 import persional.jobfinder_api.model.UserProfile;
 import persional.jobfinder_api.repository.UserProfileRepository;
@@ -26,18 +32,23 @@ import javax.crypto.SecretKey;
 import java.io.IOException;
 import java.security.Key;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.Optional;
 
 @RequiredArgsConstructor
+@Slf4j
 public class JwtFilter extends UsernamePasswordAuthenticationFilter {
 
     private final AuthenticationManager authenticationManager;
     private final UserProfileRepository userProfileRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request,
                                                 HttpServletResponse response)
             throws AuthenticationException {
+
 
         ObjectMapper mapper = new ObjectMapper();
 
@@ -48,14 +59,31 @@ public class JwtFilter extends UsernamePasswordAuthenticationFilter {
                     LoginRequest.class
             );
 
+            Optional<UserProfile> byEmail = userProfileRepository.findByEmail(loginRequest.getEmail());
+
+            // Check if email exists
+            if (byEmail.isEmpty()) {
+                throw new BadRequestException("Invalid email");
+            }
+
+            // Check if password matches
+            if (!passwordEncoder.matches(loginRequest.getPassword(), byEmail.get().getPassword())) {
+                throw new BadRequestException("password is incorrect");
+            }
+
+
             Authentication authentication = new UsernamePasswordAuthenticationToken(
                     loginRequest.getEmail(),
                     loginRequest.getPassword()
             );
             return authenticationManager.authenticate(authentication);
 
+        }catch (BadRequestException e) {
+            log.error("Authentication failed: {}", e.getMessage());
+            throw e; // Rethrow to be handled by the framework
+
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Authentication error: {}", e.getMessage());
             throw new InternalServerError("Error while authenticating user");
         }
     }
@@ -108,4 +136,5 @@ public class JwtFilter extends UsernamePasswordAuthenticationFilter {
         // Set the token in the response header
         response.setHeader("Authorization","Bearer " + token);
     }
+
 }

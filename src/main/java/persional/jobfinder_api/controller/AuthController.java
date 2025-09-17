@@ -69,22 +69,22 @@ public class AuthController {
     }
 
     @PostMapping("/refresh-token")
-    public ResponseEntity<?> refreshToken(@RequestBody Map<String, String> requestBody) {
-
-        String refreshToken = requestBody.get("refreshToken");
+    public ResponseEntity<?> refreshToken(@RequestBody RefreshTokenRequest requestBody) {
 
         try {
             // Parse & validate refresh token
             Jws<Claims> claims = Jwts.parser()
                     .verifyWith(JwtSecretUtil.getSecretKey())
                     .build()
-                    .parseSignedClaims(refreshToken);
+                    .parseSignedClaims(requestBody.getRefreshToken());
 
             Claims body = claims.getPayload();
             String username = body.getSubject();
 
+            log.info("Refreshing token for user: {}", username);
+
             // Validate user exists
-            userProfileRepository.findByUsername(username)
+            userProfileRepository.findByEmail(username)
                     .orElseThrow(() -> new BadRequestException("User not found"));
 
             // Get authorities from refresh token (optional, some designs only keep username in refresh token)
@@ -105,8 +105,14 @@ public class AuthController {
 
             Map<String, Object> response = new HashMap<>();
             response.put("accessToken", newAccessToken);
-            response.put("refreshToken", refreshToken); // send back the same refresh token
-            response.put("tokenType", "Bearer");
+            response.put("refreshToken", requestBody.getRefreshToken()); // send back the same refresh token
+            response.put("authorities",
+                    authorities.stream()
+                            .map(x -> x.get("authority"))
+                            .filter(auth -> auth.startsWith("ROLE_"))
+                            .toArray(String[]::new)
+
+            );
 
             return ResponseEntity.ok(response);
 
@@ -120,14 +126,8 @@ public class AuthController {
                     )
             );
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
-                    Map.of(
-                            "status", 401,
-                            "error", "Unauthorized",
-                            "message", "Invalid refresh token",
-                            "path", "/refresh-token"
-                    )
-            );
+           log.error("Error refreshing token: {}", e.getMessage());
+            throw new InternalServerError("An error occurred while refreshing the token.");
         }
     }
 

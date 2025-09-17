@@ -67,6 +67,7 @@ public class TokenVerifyFilter extends OncePerRequestFilter {
                     grantedAuthorities
             );
             SecurityContextHolder.getContext().setAuthentication(authentication);
+
         }catch (ExpiredJwtException e){
             log.warn(e.getMessage());
 
