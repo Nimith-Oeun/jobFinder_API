@@ -6,6 +6,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import persional.jobfinder_api.exception.CustomMaxUploadSizeExceededException;
@@ -15,7 +17,7 @@ import persional.jobfinder_api.service.UploadFileService;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/jobfinder_api/v1/upload-file")
+@RequestMapping("/jobfinder_api/v1/file")
 @RequiredArgsConstructor
 @Slf4j
 public class UploadFileController {
@@ -23,9 +25,9 @@ public class UploadFileController {
     private final UploadFileService uploadFileService;
 
 
-    @PostMapping(path = "", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize( "hasAuthority('upload:write')")
+    @PostMapping(path = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> uploadProfile(@RequestParam("file") MultipartFile file) {
-
 
         try{
 
@@ -51,5 +53,8 @@ public class UploadFileController {
         }
     }
 
-
-}
+    @GetMapping("/getPhoto")
+    public ResponseEntity<?> getFilePhoto() {
+        return uploadFileService.getfile();
+    }
+ }

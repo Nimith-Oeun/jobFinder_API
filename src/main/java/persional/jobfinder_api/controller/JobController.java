@@ -1,8 +1,10 @@
 package persional.jobfinder_api.controller;
 
+import jakarta.annotation.security.RolesAllowed;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import persional.jobfinder_api.dto.request.JobCategoryRequest;
 import persional.jobfinder_api.dto.request.JobRequestDTO;
@@ -29,29 +31,48 @@ public class JobController {
     private final JobCategoryService jobCategoryService;
     private final JobMapper jobMapper;
 
+    @RolesAllowed({"ADMIN"})
     @PostMapping("/create")
     public ResponseEntity<?> createJob(@RequestBody JobRequestDTO jobRequestDTO){
         JobResponse jobRespone = jobService.create(jobRequestDTO);
         log.info("Job created successfully: {}", jobRespone);
         return ResponseEntity.ok(SuccessRespone.success(jobRespone));
     }
+
+    @RolesAllowed({"ADMIN"})
     @PostMapping("/create/skill")
     public ResponseEntity<?> createSkill(@RequestBody SkillRequest skillRequest){
         skillService.create(skillRequest);
         return ResponseEntity.ok(SuccessRespone.success("Skill created successfully"));
     }
 
+    @RolesAllowed({"ADMIN"})
     @PostMapping("/create/category")
     public ResponseEntity<?> createCategory(@RequestBody JobCategoryRequest jobCategoryRequest){
         jobCategoryService.create(jobCategoryRequest);
         return ResponseEntity.ok(SuccessRespone.success("Category created successfully"));
     }
 
-    @GetMapping("/globle-search")
+    @GetMapping("")
     public ResponseEntity<?> globleSearch(@RequestParam Map<String,String> search) {
-        List<JobResponse> jobList = jobService.searchjob(search)
-                .stream().map(jobMapper::mapToJobResponse)
-                .toList();
-        return ResponseEntity.ok(SuccessRespone.success(jobList));
+        log.info("GET JOB METHOD: {}", search);
+        List<JobResponse> responses = jobService.searchjob(search);
+        return ResponseEntity.ok(SuccessRespone.success(responses));
+    }
+
+    @RolesAllowed({"ADMIN"})
+    @PutMapping("/update/{id}")
+    public ResponseEntity<?> updateJob(@PathVariable Long id, @RequestBody JobRequestDTO jobRequestDTO) {
+        JobResponse jobResponse = jobService.update(id, jobRequestDTO);
+        log.info("Job updated successfully: {}", jobResponse);
+        return ResponseEntity.ok(SuccessRespone.success(jobResponse));
+    }
+
+    @RolesAllowed({"ADMIN"})
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<?> deleteJob(@PathVariable Long id) {
+        jobService.delete(id);
+        log.info("Job with ID {} deleted successfully", id);
+        return ResponseEntity.ok(SuccessRespone.success("Job deleted successfully"));
     }
 }

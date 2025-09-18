@@ -9,4 +9,6 @@ public class JobApplyRespone {
     private Integer jobId;
 
     private Integer resume;
+
+    private Integer profileId;
 }

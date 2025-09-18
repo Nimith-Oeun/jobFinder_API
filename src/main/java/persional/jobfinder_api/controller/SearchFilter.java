@@ -28,17 +28,13 @@ public class SearchFilter {
 
     @GetMapping("/globle-search")
     public ResponseEntity<?> globleSearch(@RequestParam Map<String,String> search) {
-        List<JobResponse> jobList = jobService.searchjob(search)
-                .stream().map(jobMapper::mapToJobResponse)
-                .toList();
+        List<JobResponse> jobList = jobService.searchjob(search);
         return ResponseEntity.ok(SuccessRespone.success(jobList));
     }
 
     @GetMapping("/filter")
     public ResponseEntity<?> filter(@RequestParam Map<String,String> search) {
-        List<JobResponse> jobList = jobService.filter(search)
-                .stream().map(jobMapper::mapToJobResponse)
-                .toList();
+        List<JobResponse> jobList = jobService.filter(search);
         return ResponseEntity.ok(SuccessRespone.success(jobList));
     }
 }

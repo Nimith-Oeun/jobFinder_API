@@ -1,9 +1,14 @@
 package persional.jobfinder_api.dto.respones;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.io.Serial;
+import java.io.Serializable;
 
 @Data
-public class SkillRespone {
+@NoArgsConstructor
+public class SkillRespone{
 
     private String name;
 

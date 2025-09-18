@@ -27,4 +27,8 @@ public class Resume {
     @Column(name = "Part_Upload")
     private String partUpload;
 
+    @ManyToOne
+    @JoinColumn(name = "user_profile_id")
+    private UserProfile profile;
+
 }

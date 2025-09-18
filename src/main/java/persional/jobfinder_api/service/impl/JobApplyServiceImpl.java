@@ -25,7 +25,7 @@ public class JobApplyServiceImpl implements JobApplyService {
     @Override
     public JobApplyRespone createJobApply(JobApplyRequestDTO request) {
 
-        if (request.getJobId() == null || request.getResume() == null){
+        if (request.getJobId() == null || request.getResumeId() == null){
             log.error("Job ID or Resume is null in request: {}", request);
             throw new InternalServerError("Job ID and Resume must not be null");
         }

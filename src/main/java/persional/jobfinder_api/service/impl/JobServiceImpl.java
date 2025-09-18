@@ -2,6 +2,10 @@ package persional.jobfinder_api.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import persional.jobfinder_api.dto.request.JobRequestDTO;
@@ -34,6 +38,7 @@ public class JobServiceImpl implements JobService {
     private final JobCataggoryRepository jobCataggoryRepository;
     private final SkillRepository skillRepository;
 
+    @CacheEvict(value = {"jobs", "JobResponse"}, allEntries = true)  // Evict all entries in the "jobs" cache
     @Override
     public JobResponse create(JobRequestDTO jobRequestDTO) {
 
@@ -98,8 +103,10 @@ public class JobServiceImpl implements JobService {
     }
 
 
+    @Cacheable(value = "jobs", key = "#param")
     @Override
     public Job getById(Long id) {
+        log.info("fetch job by id: {}", id);
         return jobRepository.findById(id)
                 .orElseThrow(() -> new ResourNotFound("Job not found with ID: " + id));
     }
@@ -108,27 +115,56 @@ public class JobServiceImpl implements JobService {
     /*
      * Get all jobs with optional filtering by keyword or ID.
      */
+    @Cacheable(value = "JobResponse" , key = "#param")
     @Override
-    public List<Job> searchjob(Map<String, String> param) {
-
-        return getJobs(param);
+    public List<JobResponse> searchjob(Map<String, String> param) {
+        log.info("fetch all job: {}", param);
+        List<Job> fetchedJobs = getJobs(param);
+        List<JobResponse> jobResponses = fetchedJobs.stream()
+                .map(jobMapper::mapToJobResponse)
+                .toList();
+        return jobResponses;
     }
 
+    @Cacheable(value = "jobs", key = "#param")
     @Override
-    public List<Job> filter(Map<String, String> param) {
-        return getJobs(param);
+    public List<JobResponse> filter(Map<String, String> param) {
+        List<Job> jobs = getJobs(param);
+        List<JobResponse> jobResponseList = jobs.stream()
+                .map(jobMapper::mapToJobResponse)
+                .toList();
+        return jobResponseList;
     }
 
 
+    @CacheEvict(value = {"jobs", "JobResponse"}, allEntries = true)
     @Override
     public JobResponse update(Long id, JobRequestDTO jobRequestDTO) {
-        return null;
+
+        Job job = getById(id);
+
+        job.setTitle(jobRequestDTO.getTitle());
+        job.setDescription(jobRequestDTO.getDescription());
+        job.setSalary(jobRequestDTO.getSalary());
+        job.setLocation(jobRequestDTO.getLocation());
+        job.setJobType(jobRequestDTO.getJobType());
+        job.setCompany(jobRequestDTO.getCompany());
+        job.setJobCategory(jobCataggoryRepository.findByUuid(jobRequestDTO.getJobCategoryUuid())
+                .orElseThrow(() -> new ResourNotFound("Invalid job category UUID")));
+        job.setAppliationInstr(jobRequestDTO.getAppliationInstr());
+        job.setThumbnail(jobRequestDTO.getThumbnail());
+
+        Job jobAfterUpdate = jobRepository.save(job);
+        return jobMapper.mapToJobResponse(jobAfterUpdate);
     }
 
 
+    @CacheEvict(value = {"jobs", "JobResponse"}, allEntries = true)
     @Override
     public void delete(Long id) {
-
+        log.info("delete job by id: {}", id);
+        Job job = getById(id);
+        jobRepository.delete(job);
     }
 
     private  List<Job> getJobs(Map<String, String> param) {
@@ -172,6 +208,11 @@ public class JobServiceImpl implements JobService {
         if (param.containsKey("id")) {
             Long id = Long.valueOf(param.get("id"));
             return Collections.singletonList(getById(id));
+        }
+
+        // If no filters, return all jobs
+        if (param.isEmpty()) {
+            return jobRepository.findAll();
         }
 
         return Collections.emptyList();
