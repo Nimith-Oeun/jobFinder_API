@@ -50,11 +50,11 @@ public class JobApplyServiceImpl implements JobApplyService {
         return jobApplyMapper.mapToJobApplyRespone(jobApply);
     }
 
-//    @Override
-//    public JobApply getJobApplyById(Long id) {
-//        return jobApplyRepository.findById(id)
-//                .orElseThrow(() -> new ResourNotFound("Job apply not found with id: " + id));
-//    }
+    @Override
+    public JobApply getJobApplyById(Long id) {
+        return jobApplyRepository.findById(id)
+                .orElseThrow(() -> new ResourNotFound("Job apply not found with id: " + id));
+    }
 
     @Override
     public List<JobApplyResponeForClient> getJobByCurrentUser(Principal principal) {

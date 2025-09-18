@@ -12,7 +12,7 @@ public interface JobApplyService {
 
     JobApplyRespone createJobApply(JobApplyRequestDTO request);
 
-//    JobApply getJobApplyById(Long id);
+    JobApply getJobApplyById(Long id);
 
     List<JobApplyResponeForClient> getJobByCurrentUser(Principal principal);
 

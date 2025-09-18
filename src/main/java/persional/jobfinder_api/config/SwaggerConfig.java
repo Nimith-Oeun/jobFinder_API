@@ -21,14 +21,17 @@ import org.springframework.context.annotation.Configuration;
 import java.util.ArrayList;
 
 @Configuration
-//@OpenAPIDefinition(
-//        security = @SecurityRequirement(name = "basicAuth") // Secures all endpoints globally
-//)
-//@SecurityScheme(
-//        name = "basicAuth", //Matches the name used in @SecurityRequirement
-//        type = SecuritySchemeType.HTTP,
-//        scheme = "basic" //Tells Swagger to use HTTP Basic Authentication
-//)
+@OpenAPIDefinition(
+        security = {
+                @SecurityRequirement(name = "bearerAuth") // Reference the scheme name here
+        }
+)
+@SecurityScheme(
+        name = "bearerAuth",                     // Name referenced in @SecurityRequirement
+        type = SecuritySchemeType.HTTP,          // HTTP type
+        scheme = "bearer",                       // Must be "bearer"
+        bearerFormat = "JWT"                     // Optional, for UI description
+)
 public class SwaggerConfig {
 
     @Value("${server.port}")

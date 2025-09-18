@@ -1,5 +1,6 @@
 package persional.jobfinder_api.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 import persional.jobfinder_api.common.BaseEntity;
@@ -24,5 +25,6 @@ public class JobApply extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "profile_id")
+    @JsonIgnore
     private UserProfile profile;
 }

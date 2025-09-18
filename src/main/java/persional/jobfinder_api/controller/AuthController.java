@@ -37,7 +37,6 @@ public class AuthController {
     private final RegisterService registerService;
     private final UserProfileRepository userProfileRepository;
     private final ForgotPasswordService forgotPasswordService;
-    private final UserService userService;
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
