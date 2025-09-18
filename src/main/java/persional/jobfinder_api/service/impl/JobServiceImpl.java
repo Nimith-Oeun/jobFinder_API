@@ -103,7 +103,7 @@ public class JobServiceImpl implements JobService {
     }
 
 
-    @Cacheable(value = "jobs", key = "#param")
+    @Cacheable(value = "jobs", key = "#id")
     @Override
     public Job getById(Long id) {
         log.info("fetch job by id: {}", id);
