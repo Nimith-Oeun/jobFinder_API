@@ -6,4 +6,5 @@ import persional.jobfinder_api.model.Resume;
 public interface ResumeService {
 
     Resume createResume(MultipartFile file);
+    Resume getResumeById(Long id);
 }

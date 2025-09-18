@@ -72,4 +72,10 @@ public class ResumeServiceImpl implements ResumeService {
         }
 
     }
+
+    @Override
+    public Resume getResumeById(Long id) {
+        return resumeRopository.findById(id)
+                .orElseThrow(() -> new InternalServerError("Resume not found with id: " + id));
+    }
 }
