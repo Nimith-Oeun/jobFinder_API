@@ -5,14 +5,17 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
+import org.springframework.http.ContentDisposition;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import persional.jobfinder_api.dto.respones.ProfileRespone;
 import persional.jobfinder_api.enums.FileType;
 import persional.jobfinder_api.exception.InternalServerError;
+import persional.jobfinder_api.exception.ResourNotFound;
 import persional.jobfinder_api.model.UploadFile;
 import persional.jobfinder_api.model.UserProfile;
 import persional.jobfinder_api.repository.UploadFileRepository;
@@ -82,11 +85,17 @@ public class UploadFileServiceImpl implements UploadFileService {
 
     @Override
     public ResponseEntity<Resource> getfile() {
-        ProfileRespone currentUserProfile = userService.getCurrentUserProfile();
+
+        // Get current user
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentUserName = authentication.getName();
+
+        UserProfile profile = userProfileRepository.findByEmail(currentUserName)
+                .orElseThrow(() -> new ResourNotFound("User not found"));
 
         // Get file for this profile
-        UploadFile file = uploadFileRepository.findByProfileId(currentUserProfile.getId())
-                .orElseThrow(() -> new RuntimeException("File not found"));
+        UploadFile file = uploadFileRepository.findByProfileId(profile.getId())
+                .orElseThrow(() -> new ResourNotFound("File not found"));
 
         // Use the stored absolute path (it includes the correct filename and extension)
         Path path = Paths.get(file.getPartUpload());
@@ -106,6 +115,12 @@ public class UploadFileServiceImpl implements UploadFileService {
             if (contentType == null) {
                 contentType = MediaType.APPLICATION_OCTET_STREAM_VALUE;
             }
+
+            // If image → show inline, if other file → download
+            ContentDisposition contentDisposition =
+                    contentType.startsWith("image") ?
+                            ContentDisposition.inline().filename(file.getFileName() + "." + file.getFileFomate()).build() :
+                            ContentDisposition.attachment().filename(file.getFileName() + "." + file.getFileFomate()).build();
 
             return ResponseEntity.ok()
                     .contentType(MediaType.parseMediaType(contentType))
