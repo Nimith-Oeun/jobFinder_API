@@ -2,6 +2,8 @@ package persional.jobfinder_api.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import persional.jobfinder_api.dto.request.JobApplyRequestDTO;
 import persional.jobfinder_api.dto.respones.JobApplyRespone;
@@ -40,38 +42,28 @@ public class JobApplyServiceImpl implements JobApplyService {
     @Override
     public JobApplyRespone createJobApply(JobApplyRequestDTO request) {
 
-        String name = userService.getCurrentUserProfile().getEmail();
-
-        Optional<Job> job = jobRepository.findById(Long.valueOf(request.getJobId()));
-        Optional<Resume> resume = resumeRopository.findById(Long.valueOf(request.getResumeId()));
-        Optional<UserProfile> userProfile = userProfileRepository.findByEmail(name);
-
+        String name = SecurityContextHolder.getContext().getAuthentication().getName();
 
         if (request.getJobId() == null || request.getResumeId() == null){
             log.error("Job ID or Resume is null in request: {}", request);
             throw new InternalServerError("Job ID and Resume must not be null");
         }
 
-        if (job.isEmpty()) {
-            log.error("Job not found with ID: {}", request.getJobId());
-            throw new ResourNotFound("Job not found with ID: " + request.getJobId());
-        }
-        if (resume.isEmpty()) {
-            log.error("Resume not found with ID: {}", request.getResumeId());
-            throw new BadRequestException("Resume not found with ID: " + request.getResumeId());
-        }
+        Job job = jobRepository.findById(Long.valueOf(request.getJobId()))
+                .orElseThrow(() -> new ResourNotFound("Job not found with id: " + request.getJobId()));
 
-        if (userProfile.isEmpty()) {
-            log.error("UserProfile not found with email: {}", name);
-            throw new BadRequestException("UserProfile not found with email: " + name);
-        }
+        Resume resume = resumeRopository.findById(Long.valueOf(request.getResumeId()))
+                .orElseThrow(() -> new ResourNotFound("Resume not found with id: " + request.getResumeId()));
+
+        UserProfile userProfile = userProfileRepository.findByEmail(name)
+                .orElseThrow(() -> new ResourNotFound("User not found with email: " + name));
 
 
         JobApply jobApply = new JobApply();
 
-        jobApply.setJob(job.get());
-        jobApply.setResume(resume.get());
-        jobApply.setProfile(userProfile.get());
+        jobApply.setJob(job);
+        jobApply.setResume(resume);
+        jobApply.setProfile(userProfile);
 
         jobApply = jobApplyRepository.save(jobApply);
 
@@ -85,11 +77,34 @@ public class JobApplyServiceImpl implements JobApplyService {
                 .orElseThrow(() -> new ResourNotFound("Job apply not found with id: " + id));
     }
 
+    @Cacheable(value = "jobApplies" , key = "#principal.name")
     @Override
     public List<JobApplyResponeForClient> getJobByCurrentUser(Principal principal) {
 
         UserProfile userProfile = userProfileRepository.findByEmail(principal.getName())
                 .orElseThrow(() -> new ResourNotFound("User not found with email: " + principal.getName()));
+
+        List<Job> jobList = userProfile.getApplyJobs().stream()
+                .map(JobApply::getJob)
+                .toList();
+
+        List<JobApplyResponeForClient> responeForClients = jobList.stream()
+                .map(job -> JobApplyResponeForClient.builder()
+                        .title(job.getTitle())
+                        .company(job.getCompany())
+                        .location(job.getLocation())
+                        .build())
+                .toList();
+
+        /**
+         * this code is used with custom query in JobApplyRepository
+         * but it is less efficient than the above code because it makes two queries to the database
+         * one to get the user profile and another to get the jobs applied by the user profile
+         * while the above code makes only one query to get the user profile and then uses the
+         * relationship mapping to get the jobs applied by the user profile
+         * so Performance winner: findJobsAppliedByProfileId (custom query).
+         * Flexibility: userProfile.getApplyJobs().
+
 
         List<Job> appliedByProfileId = jobApplyRepository.findJobsAppliedByProfileId(userProfile.getId());
 
@@ -101,6 +116,7 @@ public class JobApplyServiceImpl implements JobApplyService {
                         .build())
                 .toList();
 
+            **/
 
         return responeForClients;
     }

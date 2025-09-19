@@ -25,6 +25,5 @@ public class JobApply extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "profile_id")
-    @JsonIgnore
     private UserProfile profile;
 }

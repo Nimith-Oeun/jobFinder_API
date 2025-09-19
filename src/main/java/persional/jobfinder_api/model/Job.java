@@ -53,10 +53,18 @@ public class Job extends BaseEntity {
     )
     private Set<Skill> skills = new HashSet<>();
 
-    @OneToMany(mappedBy = "job" , cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(
+            mappedBy = "job" ,
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
     private List<JobRequirement> jobRequirements = new ArrayList<>();
 
-    @OneToMany(mappedBy = "job" , cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(
+            mappedBy = "job" ,
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
     private List<JobApply> jobApplies = new ArrayList<>();
 
 }
