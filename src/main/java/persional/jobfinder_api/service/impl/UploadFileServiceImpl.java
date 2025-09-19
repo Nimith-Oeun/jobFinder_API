@@ -94,7 +94,7 @@ public class UploadFileServiceImpl implements UploadFileService {
                 .orElseThrow(() -> new ResourNotFound("User not found"));
 
         // Get file for this profile
-        UploadFile file = uploadFileRepository.findByProfileId(profile.getId())
+        UploadFile file = uploadFileRepository.findFirstByProfileIdOrderByIdDesc(profile.getId())
                 .orElseThrow(() -> new ResourNotFound("File not found"));
 
         // Use the stored absolute path (it includes the correct filename and extension)
