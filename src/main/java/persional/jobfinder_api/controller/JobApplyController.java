@@ -44,4 +44,11 @@ public class JobApplyController {
         List<JobApplyResponeForClient> jobByCurrentUser = jobApplyService.getJobByCurrentUser(principal);
         return ResponseEntity.ok(SuccessRespone.success(jobByCurrentUser));
     }
+
+    @PreAuthorize("hasAuthority('apply:write')")
+    @DeleteMapping("/delete/by-job/{id}")
+    public ResponseEntity<?> deleteJobApply(@PathVariable Long id){
+        jobApplyService.deleteJobApply(id);
+        return ResponseEntity.ok(SuccessRespone.success("Delete job apply successfully"));
+    }
 }

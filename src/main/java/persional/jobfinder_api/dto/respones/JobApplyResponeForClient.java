@@ -13,6 +13,7 @@ import java.util.List;
 @AllArgsConstructor
 public class JobApplyResponeForClient {
 
+    private Integer jobId;
     private String title;
     private String company;
     private String location;

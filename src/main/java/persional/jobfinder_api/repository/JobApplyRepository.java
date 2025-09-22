@@ -14,4 +14,6 @@ public interface JobApplyRepository extends JpaRepository<JobApply, Long> {
     // OR if you only want job info directly:
     @Query("SELECT ja.job FROM JobApply ja WHERE ja.profile.id = :profileId")
     List<Job> findJobsAppliedByProfileId(@Param("profileId") Long profileId);
+
+    Optional<JobApply> findByJobIdAndProfileId(Long jobId, Long profileId);
 }

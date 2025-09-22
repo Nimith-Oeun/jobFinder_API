@@ -17,4 +17,6 @@ public interface JobApplyService {
     List<JobApplyResponeForClient> getJobByCurrentUser(Principal principal);
 
 
+    void deleteJobApply(Long id);
+
 }

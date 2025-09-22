@@ -2,6 +2,7 @@ package persional.jobfinder_api.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -39,6 +40,8 @@ public class JobApplyServiceImpl implements JobApplyService {
     private final UserProfileRepository userProfileRepository;
     private final UserService userService;
 
+
+    @CacheEvict(value = "jobApplies" , allEntries = true)
     @Override
     public JobApplyRespone createJobApply(JobApplyRequestDTO request) {
 
@@ -90,6 +93,7 @@ public class JobApplyServiceImpl implements JobApplyService {
 
         List<JobApplyResponeForClient> responeForClients = jobList.stream()
                 .map(job -> JobApplyResponeForClient.builder()
+                        .jobId(job.getId().intValue())
                         .title(job.getTitle())
                         .company(job.getCompany())
                         .location(job.getLocation())
@@ -119,5 +123,20 @@ public class JobApplyServiceImpl implements JobApplyService {
             **/
 
         return responeForClients;
+    }
+
+    @CacheEvict(value = "jobApplies" , allEntries = true)
+    @Override
+    public void deleteJobApply(Long id) {
+
+        String currentUserEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        UserProfile currentUserProfile = userProfileRepository.findByEmail(currentUserEmail)
+                .orElseThrow(() -> new ResourNotFound("User not found with email: " + currentUserEmail));
+
+        JobApply apply = jobApplyRepository.findByJobIdAndProfileId(id , currentUserProfile.getId())
+                .orElseThrow(() -> new BadRequestException("You have not applied for this job or job apply not found with id: " + id));
+
+        jobApplyRepository.delete(apply);
+
     }
 }
