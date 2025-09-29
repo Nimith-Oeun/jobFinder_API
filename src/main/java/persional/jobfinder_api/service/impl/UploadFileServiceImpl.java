@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
+import org.springframework.http.CacheControl;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -32,6 +33,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor
@@ -83,6 +85,7 @@ public class UploadFileServiceImpl implements UploadFileService {
         }
     }
 
+
     @Override
     public ResponseEntity<Resource> getfile() {
 
@@ -125,6 +128,7 @@ public class UploadFileServiceImpl implements UploadFileService {
             return ResponseEntity.ok()
                     .contentType(MediaType.parseMediaType(contentType))
                     .contentLength(Files.size(path))
+                    .cacheControl(CacheControl.maxAge(30, TimeUnit.MINUTES).cachePublic()) // <-- add this for caching images
                     .body(resource);
 
         } catch (IOException e) {

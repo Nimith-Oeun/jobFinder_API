@@ -120,10 +120,9 @@ public class JobServiceImpl implements JobService {
     public List<JobResponse> searchjob(Map<String, String> param) {
         log.info("fetch all job: {}", param);
         List<Job> fetchedJobs = getJobs(param);
-        List<JobResponse> jobResponses = fetchedJobs.stream()
+        return fetchedJobs.stream()
                 .map(jobMapper::mapToJobResponse)
                 .toList();
-        return jobResponses;
     }
 
     @Cacheable(value = "jobs", key = "#param")

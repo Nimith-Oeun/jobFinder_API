@@ -18,6 +18,7 @@ import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.*;
 import persional.jobfinder_api.dto.respones.ProfileRespone;
+import persional.jobfinder_api.dto.respones.ResumeRespone;
 
 import java.time.Duration;
 import java.util.HashMap;
@@ -143,6 +144,23 @@ public class RedisConfig {
                         .serializeValuesWith(RedisSerializationContext
                                 .SerializationPair
                                 .fromSerializer(this.jackson2JsonRedisSerializer()))
+                        .disableCachingNullValues()
+        );
+
+        // resum cache
+        cacheConfigs.put("resumes",
+                config
+                        .entryTtl(Duration.ofMinutes(10))
+                        .serializeKeysWith(RedisSerializationContext
+                                .SerializationPair
+                                .fromSerializer(
+                                        redisSerializer
+                                ))
+                        .serializeValuesWith(RedisSerializationContext
+                                .SerializationPair
+                                .fromSerializer(
+                                        new Jackson2JsonRedisSerializer<>(ResumeRespone.class)
+                                ))
                         .disableCachingNullValues()
         );
 
