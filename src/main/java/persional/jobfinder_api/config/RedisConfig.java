@@ -8,6 +8,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.cache.interceptor.KeyGenerator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
@@ -17,6 +18,8 @@ import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.*;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import persional.jobfinder_api.dto.respones.ProfileRespone;
 import persional.jobfinder_api.dto.respones.ResumeRespone;
 
@@ -170,5 +173,13 @@ public class RedisConfig {
                 .withInitialCacheConfigurations(cacheConfigs) // specific cache configurations
                 .transactionAware() //if action to Db fails, the cache will roll back. cache will constant old data
                 .build();
+    }
+
+    @Bean
+    public KeyGenerator userProfileKeyGenerator(){
+        return (target, method, params) -> {
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            return auth.getName();
+        };
     }
 }

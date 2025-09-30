@@ -24,6 +24,7 @@ import persional.jobfinder_api.service.RegisterService;
 import persional.jobfinder_api.service.UserService;
 import persional.jobfinder_api.utils.JwtSecretUtil;
 
+import java.security.Principal;
 import java.util.*;
 import java.util.stream.Collectors;
 

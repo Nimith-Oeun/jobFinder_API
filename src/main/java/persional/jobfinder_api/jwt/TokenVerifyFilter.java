@@ -43,6 +43,16 @@ public class TokenVerifyFilter extends OncePerRequestFilter {
         }
 
         String token = authorizationHeader.replace("Bearer ", "");
+        if (token.isEmpty()) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+        if (token.split("\\.").length != 3) {
+            log.warn("Invalid JWT token format: {}", token);
+            filterChain.doFilter(request, response);
+            return;
+        }
+
 
         try { // Verify the JWT token
 
