@@ -33,7 +33,7 @@ public class JobApplyController {
     @PostMapping("/apply")
     public ResponseEntity<?> applyJob(@RequestBody JobApplyRequestDTO jobApplyRequestDTO){
         JobApplyRespone jobApply = jobApplyService.createJobApply(jobApplyRequestDTO);
-        log.info("Job created successfully: {}", jobApplyRequestDTO);
+        log.info("Job created successfully");
         return ResponseEntity.ok(SuccessRespone.success(jobApply));
     }
 

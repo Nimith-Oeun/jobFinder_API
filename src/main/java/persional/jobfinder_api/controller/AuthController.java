@@ -92,12 +92,12 @@ public class AuthController {
                     .map(x -> new SimpleGrantedAuthority(x.get("authority")))
                     .collect(Collectors.toSet());
 
-            // Generate new access token (30 min)
+            // Generate new access token (15 min)
             String newAccessToken = Jwts.builder()
                     .subject(username)
                     .issuedAt(new Date())
                     .claim("authorities", authorities)
-                    .expiration(new Date(System.currentTimeMillis() + 30 * 60 * 1000))
+                    .expiration(new Date(System.currentTimeMillis() + 15 * 60 * 1000))
                     .issuer("jobfinder_api")
                     .signWith(JwtSecretUtil.getSecretKey())
                     .compact();

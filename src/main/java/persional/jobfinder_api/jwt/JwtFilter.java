@@ -100,7 +100,7 @@ public class JwtFilter extends UsernamePasswordAuthenticationFilter {
                 .subject(authResult.getName())
                 .issuedAt(new Date())
                 .claim("authorities", authResult.getAuthorities())
-                .expiration(new Date(System.currentTimeMillis() + 30 * 60 * 1000)) // 30 minutes
+                .expiration(new Date(System.currentTimeMillis() + 15 * 60 * 1000)) // 15 minutes
                 .issuer("jobfinder_api")
                 .signWith(JwtSecretUtil.getSecretKey())
                 .compact();

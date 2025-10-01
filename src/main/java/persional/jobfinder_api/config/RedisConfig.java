@@ -104,7 +104,7 @@ public class RedisConfig {
         // userProfiles cache
         cacheConfigs.put("userProfiles",
                 config
-                        .entryTtl(Duration.ofMinutes(10))
+                        .entryTtl(Duration.ofMinutes(60))
                         .serializeKeysWith(RedisSerializationContext
                                 .SerializationPair
                                 .fromSerializer(

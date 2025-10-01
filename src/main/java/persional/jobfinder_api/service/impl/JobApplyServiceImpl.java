@@ -61,6 +61,12 @@ public class JobApplyServiceImpl implements JobApplyService {
         UserProfile userProfile = userProfileRepository.findByEmail(name)
                 .orElseThrow(() -> new ResourNotFound("User not found with email: " + name));
 
+        // Check if the user has already applied for the job
+        jobApplyRepository.findByJobIdAndProfileId(Long.valueOf(request.getJobId()), userProfile.getId())
+                .ifPresent(existingApply -> {
+                    throw new BadRequestException("You have already applied for this positions at Company: " + job.getCompany());
+                });
+
 
         JobApply jobApply = new JobApply();
 
