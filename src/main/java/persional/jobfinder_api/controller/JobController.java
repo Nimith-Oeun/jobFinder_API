@@ -4,7 +4,6 @@ import jakarta.annotation.security.RolesAllowed;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import persional.jobfinder_api.dto.request.JobCategoryRequest;
 import persional.jobfinder_api.dto.request.JobRequestDTO;
@@ -12,7 +11,6 @@ import persional.jobfinder_api.dto.request.SkillRequest;
 import persional.jobfinder_api.dto.respones.JobResponse;
 import persional.jobfinder_api.exception.SuccessRespone;
 import persional.jobfinder_api.mapper.JobMapper;
-import persional.jobfinder_api.model.Job;
 import persional.jobfinder_api.service.JobCategoryService;
 import persional.jobfinder_api.service.JobService;
 import persional.jobfinder_api.service.SkillService;
@@ -54,9 +52,9 @@ public class JobController {
     }
 
     @GetMapping("")
-    public ResponseEntity<?> globleSearch(@RequestParam Map<String,String> search) {
+    public ResponseEntity<?> getAll(@RequestParam Map<String,String> search) {
         log.info("GET JOB METHOD: {}", search);
-        List<JobResponse> responses = jobService.searchjob(search);
+        List<JobResponse> responses = jobService.filter(search);
         return ResponseEntity.ok(SuccessRespone.success(responses));
     }
 

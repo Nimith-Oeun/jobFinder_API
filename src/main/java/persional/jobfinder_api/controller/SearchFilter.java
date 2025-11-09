@@ -28,7 +28,7 @@ public class SearchFilter {
 
     @GetMapping("/globle-search")
     public ResponseEntity<?> globleSearch(@RequestParam Map<String,String> search) {
-        List<JobResponse> jobList = jobService.searchjob(search);
+        List<JobResponse> jobList = jobService.filter(search);
         return ResponseEntity.ok(SuccessRespone.success(jobList));
     }
 
