@@ -4,6 +4,8 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -27,6 +29,8 @@ import persional.jobfinder_api.utils.JwtSecretUtil;
 
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static persional.jobfinder_api.helper.InsertTokenIntoCookie.*;
 
 @RestController
 @RequestMapping("/jobfinder_api/v1/auth")
@@ -67,7 +71,7 @@ public class AuthController {
         );
     }
 
-    @PostMapping("/refresh-token")
+    /**@PostMapping("/refresh-token")
     public ResponseEntity<?> refreshToken(@RequestBody RefreshTokenRequest requestBody) {
 
         try {
@@ -128,7 +132,105 @@ public class AuthController {
            log.error("Error refreshing token: {}", e.getMessage());
             throw new InternalServerError("An error occurred while refreshing the token.");
         }
+    }*/
+
+    @PostMapping("/refresh-token")
+    public ResponseEntity<?> refreshToken(HttpServletRequest request,
+                                          HttpServletResponse response,
+                                          @RequestBody(required = false) RefreshTokenRequest requestBody) {
+
+        try {
+            // ✅ 1) Read refresh token from HttpOnly cookie first
+            String refreshToken = getCookieValue(request, "refresh_token");
+
+            // ✅ 2) Fallback to body (for old clients)
+            if ((refreshToken == null || refreshToken.isBlank())
+                    && requestBody != null
+                    && requestBody.getRefreshToken() != null) {
+                refreshToken = requestBody.getRefreshToken();
+            }
+
+            if (refreshToken == null || refreshToken.isBlank()) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
+                        Map.of(
+                                "status", 401,
+                                "error", "Unauthorized",
+                                "message", "Missing refresh token. Please log in again.",
+                                "path", "/refresh-token"
+                        )
+                );
+            }
+
+            // Parse & validate refresh token
+            Jws<Claims> claims = Jwts.parser()
+                    .verifyWith(JwtSecretUtil.getSecretKey())
+                    .build()
+                    .parseSignedClaims(refreshToken);
+
+            Claims body = claims.getPayload();
+            String username = body.getSubject();
+
+            log.info("Refreshing token for user: {}", username);
+
+            // Validate user exists
+            userProfileRepository.findByEmail(username)
+                    .orElseThrow(() -> new BadRequestException("User not found"));
+
+            // Get authorities from refresh token
+            List<Map<String, String>> authorities =
+                    (List<Map<String, String>>) body.get("authorities", List.class);
+
+            // ✅ Generate new access token (15 min)
+            String newAccessToken = Jwts.builder()
+                    .subject(username)
+                    .issuedAt(new Date())
+                    .claim("authorities", authorities)
+                    .expiration(new Date(System.currentTimeMillis() + 15 * 60 * 1000))
+                    .issuer("jobfinder_api")
+                    .signWith(JwtSecretUtil.getSecretKey())
+                    .compact();
+
+            // ✅ Refresh Token Rotation: issue new refresh token (7 days)
+            String newRefreshToken = Jwts.builder()
+                    .subject(username)
+                    .issuedAt(new Date())
+                    .claim("authorities", authorities)
+                    .expiration(new Date(System.currentTimeMillis() + 7L * 24 * 60 * 60 * 1000))
+                    .issuer("jobfinder_api")
+                    .signWith(JwtSecretUtil.getSecretKey())
+                    .compact();
+
+            // ✅ Set both cookies (overwrite old cookie values)
+            setTokensAsCookies(newAccessToken, newRefreshToken, request, response);
+
+            // Keep your response structure
+            Map<String, Object> resBody = new HashMap<>();
+            resBody.put("accessToken", newAccessToken);
+            resBody.put("refreshToken", newRefreshToken); // rotated token (even if frontend can't read cookie)
+            resBody.put("authorities",
+                    authorities.stream()
+                            .map(x -> x.get("authority"))
+                            .filter(auth -> auth.startsWith("ROLE_"))
+                            .toArray(String[]::new)
+            );
+
+            return ResponseEntity.ok(resBody);
+
+        } catch (ExpiredJwtException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
+                    Map.of(
+                            "status", 401,
+                            "error", "Unauthorized",
+                            "message", "Refresh token has expired. Please log in again.",
+                            "path", "/refresh-token"
+                    )
+            );
+        } catch (Exception e) {
+            log.error("Error refreshing token: {}", e.getMessage());
+            throw new InternalServerError("An error occurred while refreshing the token.");
+        }
     }
+
 
 
     @PostMapping("/forgot-password")

@@ -21,6 +21,7 @@ import persional.jobfinder_api.jwt.FilterChainExceptionHandler;
 import persional.jobfinder_api.jwt.JwtFilter;
 import persional.jobfinder_api.jwt.TokenVerifyFilter;
 import persional.jobfinder_api.repository.UserProfileRepository;
+import persional.jobfinder_api.service.RefreshTokenService;
 
 @Configuration
 @RequiredArgsConstructor
@@ -35,13 +36,19 @@ public class SecurityConfig {
     private final PasswordEncoder passwordEncoder;
     private final UserProfileRepository userProfileRepository;
     private final FilterChainExceptionHandler filterChainExceptionHandler;
+    private  final RefreshTokenService refreshTokenService;
 
     @Bean
     public SecurityFilterChain configur(HttpSecurity http)throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> {})
-                .addFilter(new JwtFilter(authenticationManager(authenticationConfiguration) , userProfileRepository , passwordEncoder))
+                .addFilter(new JwtFilter(
+                        authenticationManager(authenticationConfiguration) ,
+                        userProfileRepository ,
+                        passwordEncoder,
+                        refreshTokenService)
+                )
                 .addFilterBefore(filterChainExceptionHandler, JwtFilter.class)
                 .addFilterAfter(new TokenVerifyFilter(), JwtFilter.class)
                 .sessionManagement(config -> config

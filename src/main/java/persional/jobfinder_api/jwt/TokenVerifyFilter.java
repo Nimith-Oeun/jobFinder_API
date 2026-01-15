@@ -8,6 +8,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -25,8 +26,9 @@ import javax.crypto.SecretKey;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-@Slf4j
+/**@Slf4j
 public class TokenVerifyFilter extends OncePerRequestFilter {
 
     @Override
@@ -96,6 +98,94 @@ public class TokenVerifyFilter extends OncePerRequestFilter {
 
             return;
         }
+        filterChain.doFilter(request, response);
+    }
+*/
+@Slf4j
+public class TokenVerifyFilter extends OncePerRequestFilter {
+
+    private String getCookieValue(HttpServletRequest request, String name) {
+        if (request.getCookies() == null) return null;
+
+        return Stream.of(request.getCookies())
+                .filter(cookie -> name.equals(cookie.getName()))
+                .map(Cookie::getValue)
+                .findFirst()
+                .orElse(null);
+    }
+
+    @Override
+    protected void doFilterInternal(HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    FilterChain filterChain)
+            throws ServletException, IOException {
+
+        // 1) Try Authorization header first
+        String authorizationHeader = request.getHeader("Authorization");
+        String token = null;
+
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            token = authorizationHeader.replace("Bearer ", "").trim();
+        }
+
+        // 2) Fallback to cookie (because you store token in HttpOnly cookie)
+        if (token == null || token.isEmpty()) {
+            token = getCookieValue(request, "access_token");
+        }
+
+        // If still no token -> continue
+        if (token == null || token.isEmpty()) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        // Token format check
+        if (token.split("\\.").length != 3) {
+            log.warn("Invalid JWT token format: {}", token);
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        try {
+            Jws<Claims> claimsJws = Jwts.parser()
+                    .verifyWith(JwtSecretUtil.getSecretKey())
+                    .build()
+                    .parseSignedClaims(token);
+
+            Claims body = claimsJws.getPayload();
+            String username = body.getSubject();
+
+            List<Map<String, String>> authorities =
+                    (List<Map<String, String>>) body.get("authorities", List.class);
+
+            Set<SimpleGrantedAuthority> grantedAuthorities = authorities.stream()
+                    .map(x -> new SimpleGrantedAuthority(x.get("authority")))
+                    .collect(Collectors.toSet());
+
+            Authentication authentication = new UsernamePasswordAuthenticationToken(
+                    username,
+                    null,
+                    grantedAuthorities
+            );
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        } catch (ExpiredJwtException e) {
+            log.warn(e.getMessage());
+
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json");
+            response.setCharacterEncoding("UTF-8");
+
+            Map<String, Object> body = new HashMap<>();
+            body.put("status", HttpServletResponse.SC_UNAUTHORIZED);
+            body.put("error", "Unauthorized");
+            body.put("message", "Token has expired");
+            body.put("path", request.getRequestURI());
+
+            new ObjectMapper().writeValue(response.getOutputStream(), body);
+            return;
+        }
+
         filterChain.doFilter(request, response);
     }
 
