@@ -35,6 +35,7 @@ public enum Role {
             SOCIAL_READ,
             CATEGORY_READ,
             UPLOAD_WRITE,
+            UPLOAD_READ,
             RESUME_WRITE
 
     ));

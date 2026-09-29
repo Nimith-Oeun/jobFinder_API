@@ -8,6 +8,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.cache.interceptor.KeyGenerator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
@@ -17,7 +18,10 @@ import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.*;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import persional.jobfinder_api.dto.respones.ProfileRespone;
+import persional.jobfinder_api.dto.respones.ResumeRespone;
 
 import java.time.Duration;
 import java.util.HashMap;
@@ -100,7 +104,7 @@ public class RedisConfig {
         // userProfiles cache
         cacheConfigs.put("userProfiles",
                 config
-                        .entryTtl(Duration.ofMinutes(10))
+                        .entryTtl(Duration.ofMinutes(60))
                         .serializeKeysWith(RedisSerializationContext
                                 .SerializationPair
                                 .fromSerializer(
@@ -146,11 +150,36 @@ public class RedisConfig {
                         .disableCachingNullValues()
         );
 
+        // resum cache
+        cacheConfigs.put("resumes",
+                config
+                        .entryTtl(Duration.ofMinutes(10))
+                        .serializeKeysWith(RedisSerializationContext
+                                .SerializationPair
+                                .fromSerializer(
+                                        redisSerializer
+                                ))
+                        .serializeValuesWith(RedisSerializationContext
+                                .SerializationPair
+                                .fromSerializer(
+                                        new Jackson2JsonRedisSerializer<>(ResumeRespone.class)
+                                ))
+                        .disableCachingNullValues()
+        );
+
 
         return RedisCacheManager.builder(redisConnectionFactory)
                 .cacheDefaults(config) // default config applied to caches without specific config
                 .withInitialCacheConfigurations(cacheConfigs) // specific cache configurations
                 .transactionAware() //if action to Db fails, the cache will roll back. cache will constant old data
                 .build();
+    }
+
+    @Bean
+    public KeyGenerator userProfileKeyGenerator(){
+        return (target, method, params) -> {
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            return auth.getName();
+        };
     }
 }

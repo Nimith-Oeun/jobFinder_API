@@ -6,6 +6,7 @@ import persional.jobfinder_api.dto.respones.ProfileRespone;
 import persional.jobfinder_api.jwt.AuthUser;
 import persional.jobfinder_api.model.UserProfile;
 
+import java.security.Principal;
 import java.util.List;
 import java.util.Optional;
 

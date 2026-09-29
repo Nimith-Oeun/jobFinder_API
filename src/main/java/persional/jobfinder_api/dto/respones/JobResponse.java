@@ -16,6 +16,8 @@ import java.util.UUID;
 @NoArgsConstructor
 public class JobResponse {
 
+    private Integer id;
+
     private String title;
 
     private String description;

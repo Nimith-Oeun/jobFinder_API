@@ -5,7 +5,7 @@
 
 #Database configuration
 MyServer:
-  PORT: 8090
+  PORT: 8092
   Database:
     HOST: localhost:5432
     DBNAME: jobfinder

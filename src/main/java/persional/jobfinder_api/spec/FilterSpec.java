@@ -25,6 +25,16 @@ public class FilterSpec implements Specification<Job> {
         Join<Job , JobCategory> categoryJoins = job.join("jobCategory");
         Join<Job , Skill> skillJoins = job.join("skills", JoinType.LEFT);
 
+        if (searchFilterDTO.getKeyword() != null && !searchFilterDTO.getKeyword().isEmpty()) {
+            predicates.add(
+                    cb.like(cb.upper(job.get("title")), "%" + searchFilterDTO.getKeyword().toUpperCase() + "%")
+            );
+        }
+
+        if (searchFilterDTO.getId() != null) {
+            predicates.add(cb.equal(job.get("id"), searchFilterDTO.getId()));
+        }
+
         if (searchFilterDTO.getCategory() != null && !searchFilterDTO.getCategory().isEmpty()) {
             predicates.add(cb.equal(cb.upper(categoryJoins.get("name")), searchFilterDTO.getCategory().toUpperCase()));
         }

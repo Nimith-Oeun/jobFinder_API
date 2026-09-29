@@ -53,8 +53,10 @@ public class UploadFileController {
         }
     }
 
+    @PreAuthorize( "hasAuthority('upload:read')")
     @GetMapping("/getPhoto")
     public ResponseEntity<?> getFilePhoto() {
+        log.info("Get file photo");
         return uploadFileService.getfile();
     }
  }

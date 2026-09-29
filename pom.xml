@@ -149,6 +149,13 @@
 			<scope>test</scope>
 		</dependency>
 
+	<!-- spring vault-->
+<!--		<dependency>-->
+<!--			<groupId>org.springframework.vault</groupId>-->
+<!--			<artifactId>spring-vault-core</artifactId>-->
+<!--			<version>3.1.1</version>-->
+<!--		</dependency>-->
+
 <!--	END 	-->
 
 	</dependencies>

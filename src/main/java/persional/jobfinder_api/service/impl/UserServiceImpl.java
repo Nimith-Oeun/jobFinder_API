@@ -51,7 +51,7 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new ResourNotFound("User not found with id: " + id));
     }
 
-    @Cacheable(value = "userProfiles" )
+    @Cacheable(value = "userProfiles" , keyGenerator = "userProfileKeyGenerator")
     @Override
     public ProfileRespone getCurrentUserProfile() {
 

@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import persional.jobfinder_api.dto.respones.ResumeRespone;
 import persional.jobfinder_api.exception.CustomMaxUploadSizeExceededException;
 import persional.jobfinder_api.exception.SuccessRespone;
 import persional.jobfinder_api.service.ResumeService;
@@ -51,6 +52,14 @@ public class ResumeController {
                     e.getMessage()));
 
         }
+    }
+
+    @PreAuthorize( "hasAuthority('resume:write')")
+    @GetMapping("/getResume")
+    public ResponseEntity<?> getResume() {
+        log.info("Get resume Method");
+        ResumeRespone resumeByProfileId = resumeService.getResumeByProfileId();
+        return ResponseEntity.ok(SuccessRespone.success(resumeByProfileId));
     }
 
  }
